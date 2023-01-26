@@ -80,8 +80,26 @@ contract Goal is
         return newTokenId;
     }
 
-    // TODO: Implement
-    function watch(uint256 tokenId) public {}
+    function watch(uint256 tokenId) public {
+        // Checks
+        _requireNotPaused();
+        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
+        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        bool isSenderWatcher = false;
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].accountAddress == msg.sender) {
+                isSenderWatcher = true;
+            }
+        }
+        require(!isSenderWatcher, Errors.SENDER_IS_ALREADY_WATCHER);
+        // Add watcher
+        DataTypes.GoalWatcher memory tokenWatcher = DataTypes.GoalWatcher(
+            block.timestamp,
+            msg.sender
+        );
+        _watchers[tokenId].push(tokenWatcher);
+        emit WatcherSet(tokenId, msg.sender, tokenWatcher);
+    }
 
     // TODO: Implement
     function close(uint256 tokenId) public {}

@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 library Errors {
     // Common
+    string internal constant TOKEN_DOES_NOT_EXIST = "Token does not exist";
     string internal constant TOKEN_IS_NON_TRANSFERABLE =
         "Token is non-transferable";
 
@@ -14,4 +15,7 @@ library Errors {
     string
         internal constant MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP =
         "Must be more than 24 hours before deadline timestamp";
+    string internal constant GOAL_IS_CLOSED = "Goal is closed";
+    string internal constant SENDER_IS_ALREADY_WATCHER =
+        "Sender is already watcher";
 }

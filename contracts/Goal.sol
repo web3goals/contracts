@@ -1,0 +1,142 @@
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.9;
+
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "./libraries/DataTypes.sol";
+import "./libraries/Errors.sol";
+import "./libraries/Constants.sol";
+
+/**
+ * Contract to set, close goals and become a goals watcher.
+ */
+contract Goal is
+    ERC721URIStorageUpgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
+    using Counters for Counters.Counter;
+
+    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams params);
+    event WatcherSet(
+        uint256 indexed tokenId,
+        address indexed watcherAccountAddress,
+        DataTypes.GoalWatcher watcher
+    );
+    event URISet(uint256 indexed tokenId, string tokenURI);
+
+    address private _hubAddress;
+    uint private _usageFeePercent;
+    Counters.Counter private _counter;
+    mapping(uint256 => DataTypes.GoalParams) private _params;
+    mapping(uint256 => DataTypes.GoalWatcher[]) private _watchers;
+
+    function initialize(
+        address hubAddress,
+        uint usageFeePercent
+    ) public initializer {
+        __ERC721_init("Web3 Goals Goal", "W3GG");
+        __Ownable_init();
+        __Pausable_init();
+        _hubAddress = hubAddress;
+        _usageFeePercent = usageFeePercent;
+    }
+
+    function set(
+        string memory uri,
+        uint fee,
+        uint deadlineTimestamp
+    ) public payable returns (uint256) {
+        // Checks
+        _requireNotPaused();
+        require(msg.value == fee, Errors.FEE_MUST_BE_EQUAL_TO_MESSAGE_VALUE);
+        require(fee > 0, Errors.FEE_MUST_BE_GREATER_THAN_ZERO);
+        require(
+            deadlineTimestamp > block.timestamp + Constants.SECONDS_PER_DAY,
+            Errors.MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP
+        );
+        // Update counter
+        _counter.increment();
+        // Mint token
+        uint256 newTokenId = _counter.current();
+        _mint(msg.sender, newTokenId);
+        // Set params
+        DataTypes.GoalParams memory tokenParams = DataTypes.GoalParams(
+            block.timestamp,
+            msg.sender,
+            fee,
+            deadlineTimestamp,
+            false,
+            false
+        );
+        _params[newTokenId] = tokenParams;
+        emit ParamsSet(newTokenId, tokenParams);
+        // Set uri
+        _setTokenURI(newTokenId, uri);
+        emit URISet(newTokenId, uri);
+        // Return
+        return newTokenId;
+    }
+
+    // TODO: Implement
+    function watch(uint256 tokenId) public {}
+
+    // TODO: Implement
+    function close(uint256 tokenId) public {}
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function uppause() public onlyOwner {
+        _unpause();
+    }
+
+    function getCurrentCounter() public view returns (uint) {
+        return _counter.current();
+    }
+
+    function getHubAddress() public view returns (address) {
+        return _hubAddress;
+    }
+
+    function setHubAddress(address hubAddress) public onlyOwner {
+        _hubAddress = hubAddress;
+    }
+
+    function getUsageFeePercent() public view returns (uint) {
+        return _usageFeePercent;
+    }
+
+    function setUsageFeePercent(uint usageFeePercent) public onlyOwner {
+        _usageFeePercent = usageFeePercent;
+    }
+
+    function getParams(
+        uint256 tokenId
+    ) public view returns (DataTypes.GoalParams memory) {
+        return _params[tokenId];
+    }
+
+    function getWatchers(
+        uint256 tokenId
+    ) public view returns (DataTypes.GoalWatcher[] memory) {
+        return _watchers[tokenId];
+    }
+
+    /**
+     * Hook that is called before any token transfer.
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual override(ERC721Upgradeable) {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+        // Disable transfers except minting
+        require(from == address(0), Errors.TOKEN_IS_NON_TRANSFERABLE);
+    }
+}

@@ -46,13 +46,16 @@ contract Goal is
 
     function set(
         string memory uri,
-        uint fee,
+        uint stake,
         uint deadlineTimestamp
     ) public payable returns (uint256) {
         // Checks
         _requireNotPaused();
-        require(msg.value == fee, Errors.FEE_MUST_BE_EQUAL_TO_MESSAGE_VALUE);
-        require(fee > 0, Errors.FEE_MUST_BE_GREATER_THAN_ZERO);
+        require(
+            msg.value == stake,
+            Errors.STAKE_MUST_BE_EQUAL_TO_MESSAGE_VALUE
+        );
+        require(stake > 0, Errors.STAKE_MUST_BE_GREATER_THAN_ZERO);
         require(
             deadlineTimestamp > block.timestamp + Constants.SECONDS_PER_DAY,
             Errors.MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP
@@ -66,7 +69,7 @@ contract Goal is
         DataTypes.GoalParams memory tokenParams = DataTypes.GoalParams(
             block.timestamp,
             msg.sender,
-            fee,
+            stake,
             deadlineTimestamp,
             false,
             false

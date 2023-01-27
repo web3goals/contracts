@@ -5,7 +5,7 @@ library DataTypes {
     struct GoalParams {
         uint createdTimestamp;
         address authorAddress;
-        uint authorFee;
+        uint authorStake;
         uint deadlineTimestamp;
         bool isClosed;
         bool isAchieved;

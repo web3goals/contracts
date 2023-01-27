@@ -18,10 +18,10 @@ makeSuiteCleanRoom("Goal Watching", function () {
         .connect(userOne)
         .set(
           goalParams.one.uri,
-          goalParams.one.fee,
+          goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
           {
-            value: goalParams.one.fee,
+            value: goalParams.one.stake,
           }
         )
     ).to.be.not.reverted;

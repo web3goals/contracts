@@ -30,9 +30,9 @@ export const deployedContracts: {
     },
     goal: {
       name: "Goal",
-      proxy: "0x6C8A8494E0bB4cd349e5eFaAa68BcBcDddF50303",
+      proxy: "0x44EAe6f0C8E0714B8d8676eA803Dec04B492Ba16",
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
-      impl: "0x1e493A210B98C3fD90d230F737547AF37c7ad332",
+      impl: "0xba07b819C350478c03b7a02cF08a486D758f3AA2",
     },
     usage: {
       name: "Usage",

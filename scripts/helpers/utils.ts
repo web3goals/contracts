@@ -24,7 +24,9 @@ export async function deployProxyWithLogs(
   contractArgs?: Array<any>
 ): Promise<Contract> {
   console.log(`\n👟 Start deploy '${contractName}' proxy contract`);
-  const contract = await upgrades.deployProxy(contractFactory, contractArgs);
+  const contract = await upgrades.deployProxy(contractFactory, contractArgs, {
+    timeout: 180000,
+  });
   await contract.deployed();
   console.log("✅ Contract deployed to " + contract.address);
   console.log(

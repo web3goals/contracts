@@ -5,6 +5,14 @@ import { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 
+const accounts = [];
+if (process.env.PRIVATE_KEY_1) {
+  accounts.push(process.env.PRIVATE_KEY_1);
+}
+if (process.env.PRIVATE_KEY_2) {
+  accounts.push(process.env.PRIVATE_KEY_2);
+}
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.17",
@@ -18,11 +26,12 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: process.env.RPC_URL_MUMBAI || "",
-      accounts:
-        process.env.PRIVATE_KEY_MUMBAI_1 !== undefined &&
-        process.env.PRIVATE_KEY_MUMBAI_2 !== undefined
-          ? [process.env.PRIVATE_KEY_MUMBAI_1, process.env.PRIVATE_KEY_MUMBAI_2]
-          : [],
+      accounts: accounts,
+    },
+    hyperspace: {
+      chainId: 3141,
+      url: process.env.RPC_URL_HYPERSPACE || "",
+      accounts: accounts,
     },
   },
   etherscan: {

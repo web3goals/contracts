@@ -39,20 +39,20 @@ export const deployedContracts: {
       impl: "0x99c5Cd2dF6BE0b6410bb9b870A004932bAa31F33",
     },
   },
-};
-
-export const goalUsageFeePercent = 10;
-
-export const deployedContractsData: {
-  [key: string]: {
+  hyperspace: {
+    hub: {
+      name: "Hub",
+    },
     goal: {
-      usageFeePercent: number;
-    };
-  };
-} = {
-  mumbai: {
-    goal: {
-      usageFeePercent: 10,
+      name: "Goal",
+    },
+    usage: {
+      name: "Usage",
+    },
+    bio: {
+      name: "Bio",
     },
   },
 };
+
+export const goalContractUsagePercent = 10;

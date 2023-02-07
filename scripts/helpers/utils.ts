@@ -1,37 +1,45 @@
 import { Contract, ContractFactory } from "ethers";
 import { upgrades } from "hardhat";
 
-export async function deployWithLogs(
-  chainName: string,
-  contractName: string,
-  contractFactory: ContractFactory,
-  contractArgs?: Array<any>
-): Promise<Contract> {
-  console.log(`\n👟 Start deploy '${contractName}' contract`);
-  const contract = await contractFactory.deploy(contractArgs);
+export async function deployWithLogs(args: {
+  chainName: string;
+  contractName: string;
+  contractFactory: ContractFactory;
+  contractArgs?: Array<any>;
+  isProxyRequired?: boolean;
+  isInitializeRequired?: boolean;
+}): Promise<Contract> {
+  let contract;
+  // Deploy with proxy
+  if (args.isProxyRequired) {
+    console.log(`\n👟 Start deploy '${args.contractName}' contract with proxy`);
+    contract = await upgrades.deployProxy(
+      args.contractFactory,
+      args.contractArgs,
+      {
+        timeout: 180000,
+      }
+    );
+    await contract.deployed();
+  }
+  // Deploy without proxy
+  else {
+    console.log(`\n👟 Start deploy '${args.contractName}' contract`);
+    contract = await args.contractFactory.deploy();
+    await contract.deployed();
+    // Use initialize function
+    if (args.isInitializeRequired) {
+      if (args.contractArgs) {
+        await contract.initialize(...args.contractArgs);
+      } else {
+        await contract.initialize();
+      }
+    }
+  }
   console.log("✅ Contract deployed to " + contract.address);
   console.log(
     "👉 Command for vefifying: " +
-      `npx hardhat verify --network ${chainName} ${contract.address}`
-  );
-  return contract;
-}
-
-export async function deployProxyWithLogs(
-  chainName: string,
-  contractName: string,
-  contractFactory: ContractFactory,
-  contractArgs?: Array<any>
-): Promise<Contract> {
-  console.log(`\n👟 Start deploy '${contractName}' proxy contract`);
-  const contract = await upgrades.deployProxy(contractFactory, contractArgs, {
-    timeout: 180000,
-  });
-  await contract.deployed();
-  console.log("✅ Contract deployed to " + contract.address);
-  console.log(
-    "👉 Command for vefifying: " +
-      `npx hardhat verify --network ${chainName} ${contract.address}`
+      `npx hardhat verify --network ${args.chainName} ${contract.address}`
   );
   return contract;
 }

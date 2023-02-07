@@ -10,15 +10,6 @@
 - Verify contract - `npx hardhat verify --network mumbai 0xE78Ec547bdE5697c1Dd2B32524c9a51F4385CC08`
 - Run sandbox script - `npx hardhat run scripts/sandbox.ts --network mumbai`
 
-## `.env` example
-
-```
-PRIVATE_KEY_MUMBAI_1=
-PRIVATE_KEY_MUMBAI_2=
-RPC_URL_MUMBAI=
-ETHERSCAN_API_KEY_MUMBAI=
-```
-
 ## Links
 
 - Debugging with hardhat - https://hardhat.org/tutorial/debugging-with-hardhat-network

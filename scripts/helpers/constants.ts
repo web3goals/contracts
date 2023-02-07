@@ -1,24 +1,16 @@
+interface DeployedContract {
+  name: string;
+  proxy?: string;
+  proxyAdmin?: string;
+  impl?: string;
+}
+
 export const deployedContracts: {
   [key: string]: {
-    hub: {
-      name: string;
-      proxy: string;
-      proxyAdmin: string;
-      impl: string;
-    };
-    goal: {
-      name: string;
-      proxy: string;
-      proxyAdmin: string;
-      impl: string;
-    };
-    usage: { name: string; proxy: string; proxyAdmin: string; impl: string };
-    bio: {
-      name: string;
-      proxy: string;
-      proxyAdmin: string;
-      impl: string;
-    };
+    hub: DeployedContract;
+    goal: DeployedContract;
+    usage: DeployedContract;
+    bio: DeployedContract;
   };
 } = {
   mumbai: {
@@ -48,6 +40,8 @@ export const deployedContracts: {
     },
   },
 };
+
+export const goalUsageFeePercent = 10;
 
 export const deployedContractsData: {
   [key: string]: {

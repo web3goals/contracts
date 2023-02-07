@@ -48,18 +48,26 @@ export const deployedContracts: {
     hub: {
       name: "Hub",
       isUpgreadable: false,
+      proxy: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
+      impl: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
     },
     goal: {
       name: "Goal",
       isUpgreadable: false,
+      proxy: "0x1b21550F42E993d1b692d18D79bCd783638633F2",
+      impl: "0x1b21550F42E993d1b692d18D79bCd783638633F2",
     },
     usage: {
       name: "Usage",
       isUpgreadable: false,
+      proxy: "0x9b18515b74eF6115A673c6D01C454D8F72f84177",
+      impl: "0x9b18515b74eF6115A673c6D01C454D8F72f84177",
     },
     bio: {
       name: "Bio",
       isUpgreadable: false,
+      proxy: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
+      impl: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
     },
   },
 };

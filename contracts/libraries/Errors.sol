@@ -18,4 +18,9 @@ library Errors {
     string internal constant GOAL_IS_CLOSED = "Goal is closed";
     string internal constant SENDER_IS_ALREADY_WATCHER =
         "Sender is already watcher";
+    string internal constant SENDER_IS_NOT_GOAL_AUTHOR =
+        "Sender is not goal author";
+    string internal constant WATCHER_IS_NOT_FOUND = "Watcher is not found";
+    string internal constant WATCHER_IS_ALREADY_ACCEPTED =
+        "Watcher is already accepted";
 }

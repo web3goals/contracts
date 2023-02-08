@@ -106,6 +106,31 @@ contract Goal is
         emit WatcherSet(tokenId, msg.sender, tokenWatcher);
     }
 
+    function acceptWatcher(uint256 tokenId, address watcherAddress) public {
+        // Checks
+        _requireNotPaused();
+        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
+        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        require(
+            _params[tokenId].authorAddress == msg.sender,
+            Errors.SENDER_IS_NOT_GOAL_AUTHOR
+        );
+        // Check watcher
+        uint watcherIndex = 2 ^ (256 - 1);
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].accountAddress == watcherAddress) {
+                watcherIndex = i;
+            }
+        }
+        require(watcherIndex != 2 ^ (256 - 1), Errors.WATCHER_IS_NOT_FOUND);
+        DataTypes.GoalWatcher storage watcher = _watchers[tokenId][
+            watcherIndex
+        ];
+        require(!watcher.isAccepted, Errors.WATCHER_IS_ALREADY_ACCEPTED);
+        // Update watcher
+        watcher.isAccepted = true;
+    }
+
     // TODO: Implement
     function close(uint256 tokenId) public {}
 

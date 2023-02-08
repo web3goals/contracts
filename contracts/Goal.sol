@@ -83,7 +83,7 @@ contract Goal is
         return newTokenId;
     }
 
-    function watch(uint256 tokenId) public {
+    function watch(uint256 tokenId, string memory extraDataURI) public {
         // Checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
@@ -98,7 +98,9 @@ contract Goal is
         // Add watcher
         DataTypes.GoalWatcher memory tokenWatcher = DataTypes.GoalWatcher(
             block.timestamp,
-            msg.sender
+            msg.sender,
+            false,
+            extraDataURI
         );
         _watchers[tokenId].push(tokenWatcher);
         emit WatcherSet(tokenId, msg.sender, tokenWatcher);

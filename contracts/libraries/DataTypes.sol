@@ -14,5 +14,7 @@ library DataTypes {
     struct GoalWatcher {
         uint addedTimestamp;
         address accountAddress;
+        bool isAccepted;
+        string extraDataURI;
     }
 }

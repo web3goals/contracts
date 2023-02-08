@@ -30,6 +30,11 @@ export const goalParams = {
   },
 };
 
+export const goalWatcherExtraDataUris = {
+  one: "ipfs://one",
+  two: "ipfs://two",
+};
+
 export const bioUris = {
   one: "ipfs://one",
   two: "ipfs://two",

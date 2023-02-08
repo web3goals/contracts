@@ -1,14 +1,13 @@
+import { expect } from "chai";
 import {
   goalContract,
   goalParams,
+  goalWatcherExtraDataUris,
   makeSuiteCleanRoom,
   userOne,
-  userOneAddress,
   userThree,
   userTwo,
 } from "../../setup";
-import { expect } from "chai";
-import { ethers } from "hardhat";
 
 makeSuiteCleanRoom("Goal Watching", function () {
   it("User should be able to watch a goal", async function () {
@@ -29,11 +28,15 @@ makeSuiteCleanRoom("Goal Watching", function () {
     const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
     // Watch goal by user two
     await expect(
-      goalContract.connect(userTwo).watch(setGoalId)
+      goalContract
+        .connect(userTwo)
+        .watch(setGoalId, goalWatcherExtraDataUris.one)
     ).to.be.not.reverted;
     // Watch goal by user three
     await expect(
-      goalContract.connect(userThree).watch(setGoalId)
+      goalContract
+        .connect(userThree)
+        .watch(setGoalId, goalWatcherExtraDataUris.two)
     ).to.be.not.reverted;
     // Check goal watchers
     const watchers = await goalContract.getWatchers(setGoalId);

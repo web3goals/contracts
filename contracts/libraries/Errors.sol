@@ -16,6 +16,8 @@ library Errors {
         internal constant MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP =
         "Must be more than 24 hours before deadline timestamp";
     string internal constant GOAL_IS_CLOSED = "Goal is closed";
+    string internal constant GOAL_AUTHOR_CAN_NOT_BE_A_WATCHER =
+        "Goal author can not be a watcher";
     string internal constant SENDER_IS_ALREADY_WATCHER =
         "Sender is already watcher";
     string internal constant SENDER_IS_NOT_GOAL_AUTHOR =

@@ -85,12 +85,15 @@ contract Goal is
         return newTokenId;
     }
 
-    // TODO: Goal author can not be a watcher
     function watch(uint256 tokenId, string memory extraDataURI) public {
         // Checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
         require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        require(
+            _params[tokenId].authorAddress != msg.sender,
+            Errors.GOAL_AUTHOR_CAN_NOT_BE_A_WATCHER
+        );
         bool isSenderWatcher = false;
         for (uint i = 0; i < _watchers[tokenId].length; i++) {
             if (_watchers[tokenId][i].accountAddress == msg.sender) {

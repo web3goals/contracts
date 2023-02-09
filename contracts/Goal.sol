@@ -135,7 +135,8 @@ contract Goal is
         require(!watcher.isAccepted, Errors.WATCHER_IS_ALREADY_ACCEPTED);
         // Update watcher
         watcher.isAccepted = true;
-        // TODO: Emit watcher set event
+        // Emit events
+        emit WatcherSet(tokenId, msg.sender, watcher);
     }
 
     function closeAsAchieved(uint256 tokenId, string memory proofURI) public {

@@ -27,6 +27,7 @@ contract Goal is
     );
     event URISet(uint256 indexed tokenId, string tokenURI);
     event ClosedAsAchieved(uint256 indexed tokenId);
+    event ClosedAsFailed(uint256 indexed tokenId);
 
     address private _hubAddress;
     uint private _usageFeePercent;
@@ -166,8 +167,45 @@ contract Goal is
         require(sent, Errors.FAIL_TO_RETURN_AUTHOR_STAKE);
     }
 
-    // TODO: Implement
-    function closeAsFailed() public {}
+    function closeAsFailed(uint256 tokenId) public {
+        // Checks
+        _requireNotPaused();
+        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
+        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        if (
+            _params[tokenId].deadlineTimestamp > block.timestamp &&
+            _params[tokenId].authorAddress != msg.sender
+        ) {
+            revert(Errors.ONLY_GOAL_AUTHOR_CAN_CLOSE_GOAL_BEFORE_DEADLINE);
+        }
+        // Update params
+        _params[tokenId].isClosed = true;
+        _params[tokenId].isAchieved = false;
+        // Emit events
+        emit ParamsSet(tokenId, _params[tokenId]);
+        emit ClosedAsFailed(tokenId);
+        // Define number of accepted watchers
+        uint acceptedWatchersNumber = 0;
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].isAccepted) {
+                acceptedWatchersNumber++;
+            }
+        }
+        // Send stake to accepted watchers
+        if (acceptedWatchersNumber == 0) {
+            return;
+        }
+        uint watcherStakePart = _params[tokenId].authorStake /
+            acceptedWatchersNumber;
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].isAccepted) {
+                (bool sent, ) = _watchers[tokenId][i].accountAddress.call{
+                    value: watcherStakePart
+                }("");
+                require(sent, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER);
+            }
+        }
+    }
 
     function pause() public onlyOwner {
         _pause();

@@ -11,7 +11,7 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Accepting Watchers", function () {
-  it("User should be able to accept a watcher", async function () {
+  it("Goal author should be able to accept a watcher", async function () {
     // Set a goal by user one
     await expect(
       goalContract
@@ -43,7 +43,7 @@ makeSuiteCleanRoom("Goal Accepting Watchers", function () {
     const watchersBefore = await goalContract.getWatchers(setGoalId);
     expect(watchersBefore[0].isAccepted).to.be.equal(false);
     expect(watchersBefore[1].isAccepted).to.be.equal(false);
-    // Accept second watcher as user one
+    // Accept second watcher by user one
     await expect(
       goalContract.connect(userOne).acceptWatcher(setGoalId, userThreeAddress)
     ).to.be.not.reverted;

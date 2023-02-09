@@ -27,6 +27,10 @@ library Errors {
     string internal constant WATCHER_IS_NOT_FOUND = "Watcher is not found";
     string internal constant WATCHER_IS_ALREADY_ACCEPTED =
         "Watcher is already accepted";
+    string internal constant ONLY_GOAL_AUTHOR_CAN_CLOSE_GOAL_BEFORE_DEADLINE =
+        "Only goal author can close goal before deadline";
     string internal constant FAIL_TO_RETURN_AUTHOR_STAKE =
         "Fail to return author stake";
+    string internal constant FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER =
+        "Fail send a part of stake to watcher";
 }

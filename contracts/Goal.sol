@@ -83,6 +83,7 @@ contract Goal is
         return newTokenId;
     }
 
+    // TODO: Goal author can not be a watcher
     function watch(uint256 tokenId, string memory extraDataURI) public {
         // Checks
         _requireNotPaused();

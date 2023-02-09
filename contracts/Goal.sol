@@ -26,6 +26,7 @@ contract Goal is
         DataTypes.GoalWatcher watcher
     );
     event URISet(uint256 indexed tokenId, string tokenURI);
+    event ClosedAsAchieved(uint256 indexed tokenId);
 
     address private _hubAddress;
     uint private _usageFeePercent;
@@ -72,7 +73,8 @@ contract Goal is
             stake,
             deadlineTimestamp,
             false,
-            false
+            false,
+            ""
         );
         _params[newTokenId] = tokenParams;
         emit ParamsSet(newTokenId, tokenParams);
@@ -130,10 +132,38 @@ contract Goal is
         require(!watcher.isAccepted, Errors.WATCHER_IS_ALREADY_ACCEPTED);
         // Update watcher
         watcher.isAccepted = true;
+        // TODO: Emit watcher set event
+    }
+
+    function closeAsAchieved(uint256 tokenId, string memory proofURI) public {
+        // Checks
+        _requireNotPaused();
+        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
+        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        require(
+            _params[tokenId].authorAddress == msg.sender,
+            Errors.SENDER_IS_NOT_GOAL_AUTHOR
+        );
+        require(
+            _params[tokenId].deadlineTimestamp > block.timestamp,
+            Errors.GOAL_DEADLINE_HAS_PASSED
+        );
+        // Update params
+        _params[tokenId].isClosed = true;
+        _params[tokenId].isAchieved = true;
+        _params[tokenId].proofURI = proofURI;
+        // Emit events
+        emit ParamsSet(tokenId, _params[tokenId]);
+        emit ClosedAsAchieved(tokenId);
+        // Return stake
+        (bool sent, ) = _params[tokenId].authorAddress.call{
+            value: _params[tokenId].authorStake
+        }("");
+        require(sent, Errors.FAIL_TO_RETURN_AUTHOR_STAKE);
     }
 
     // TODO: Implement
-    function close(uint256 tokenId) public {}
+    function closeAsFailed() public {}
 
     function pause() public onlyOwner {
         _pause();

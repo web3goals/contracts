@@ -20,7 +20,11 @@ library Errors {
         "Sender is already watcher";
     string internal constant SENDER_IS_NOT_GOAL_AUTHOR =
         "Sender is not goal author";
+    string internal constant GOAL_DEADLINE_HAS_PASSED =
+        "Goal deadline has passed";
     string internal constant WATCHER_IS_NOT_FOUND = "Watcher is not found";
     string internal constant WATCHER_IS_ALREADY_ACCEPTED =
         "Watcher is already accepted";
+    string internal constant FAIL_TO_RETURN_AUTHOR_STAKE =
+        "Fail to return author stake";
 }

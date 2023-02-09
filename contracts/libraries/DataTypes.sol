@@ -9,6 +9,7 @@ library DataTypes {
         uint deadlineTimestamp;
         bool isClosed;
         bool isAchieved;
+        string proofURI;
     }
 
     struct GoalWatcher {

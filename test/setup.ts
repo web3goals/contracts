@@ -27,6 +27,7 @@ export const goalParams = {
     uri: "ipfs://...",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
+    proofUri: "ipfs://...",
   },
 };
 

@@ -110,7 +110,7 @@ contract Goal is
             extraDataURI
         );
         _watchers[tokenId].push(tokenWatcher);
-        emit WatcherSet(tokenId, msg.sender, tokenWatcher);
+        emit WatcherSet(tokenId, tokenWatcher.accountAddress, tokenWatcher);
     }
 
     function acceptWatcher(uint256 tokenId, address watcherAddress) public {
@@ -137,7 +137,7 @@ contract Goal is
         // Update watcher
         watcher.isAccepted = true;
         // Emit events
-        emit WatcherSet(tokenId, msg.sender, watcher);
+        emit WatcherSet(tokenId, watcher.accountAddress, watcher);
     }
 
     function closeAsAchieved(uint256 tokenId, string memory proofURI) public {

@@ -70,6 +70,32 @@ export const deployedContracts: {
       impl: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
     },
   },
+  mantleTestnet: {
+    hub: {
+      name: "Hub",
+      isUpgreadable: false,
+      proxy: "0x02008a8DBc938bd7930bf370617065B6B0c1221a",
+      impl: "0x02008a8DBc938bd7930bf370617065B6B0c1221a",
+    },
+    goal: {
+      name: "Goal",
+      isUpgreadable: false,
+      proxy: "0x1e4712A93beEc0aa26151CF44061eE91DD56f921",
+      impl: "0x1e4712A93beEc0aa26151CF44061eE91DD56f921",
+    },
+    usage: {
+      name: "Usage",
+      isUpgreadable: false,
+      proxy: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
+      impl: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
+    },
+    bio: {
+      name: "Bio",
+      isUpgreadable: false,
+      proxy: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
+      impl: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
+    },
+  },
 };
 
 export const goalContractUsagePercent = 10;

@@ -25,9 +25,9 @@ export const deployedContracts: {
     goal: {
       name: "Goal",
       isUpgreadable: true,
-      proxy: "0xB9EFE9729120D7C94a8c8032ef2606c13d7cf0FF",
+      proxy: "0xA7397943E64E78fE977d3a3C21F5e45BFb705510",
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
-      impl: "0x2Cd686c90a1527d6A5133D2D80F1b7ec1abF4c55",
+      impl: "0xf73e04569Bbfe02386B348667f76e7df7E1C2552",
     },
     usage: {
       name: "Usage",

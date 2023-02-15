@@ -98,4 +98,20 @@ export const deployedContracts: {
   },
 };
 
-export const goalContractUsagePercent = 10;
+export const contractsData: {
+  [key: string]: {
+    goalContractUsagePercent: number;
+    goalContractEpnsCommContractAddress?: string;
+    goalContractEpnsChannelAddress?: string;
+  };
+} = {
+  mumbai: {
+    goalContractUsagePercent: 10,
+    goalContractEpnsCommContractAddress:
+      "0xb3971bcef2d791bc4027bbfedfb47319a4aaaaaa",
+    goalContractEpnsChannelAddress:
+      "0x4306d7a79265d2cb85db0c5a55ea5f4f6f73c4b1",
+  },
+  hyperspace: { goalContractUsagePercent: 10 },
+  mantleTestnet: { goalContractUsagePercent: 10 },
+};

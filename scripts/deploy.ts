@@ -5,10 +5,7 @@ import {
   Hub__factory,
   Usage__factory,
 } from "../typechain-types";
-import {
-  deployedContracts,
-  goalContractUsagePercent as goalContractUsageFeePercent,
-} from "./helpers/constants";
+import { contractsData, deployedContracts } from "./helpers/constants";
 import { deployWithLogs, upgradeProxyWithLogs } from "./helpers/utils";
 
 async function main() {
@@ -28,6 +25,7 @@ async function main() {
 
   // Define chain data
   const chainContracts = deployedContracts[chain];
+  const chainContractsData = contractsData[chain];
 
   // Deploy or upgrade hub contract
   if (!chainContracts.hub.proxy) {
@@ -68,17 +66,43 @@ async function main() {
     return;
   }
 
+  // TODO: Deploy verifiers supported by chain and add it to hub
+
   // Deploy or upgrade goal contract
   if (!chainContracts.goal.proxy) {
     const contract = await deployWithLogs({
       chainName: chain,
       contractName: chainContracts.goal.name,
       contractFactory: new Goal__factory(deployerWallet),
-      contractArgs: [chainContracts.hub.proxy, goalContractUsageFeePercent],
+      contractArgs: [
+        chainContracts.hub.proxy,
+        chainContractsData.goalContractUsagePercent,
+      ],
       isProxyRequired: chainContracts.goal.isUpgreadable,
       isInitializeRequired: !chainContracts.goal.isUpgreadable,
     });
     chainContracts.goal.proxy = contract.address;
+    if (
+      chainContractsData.goalContractEpnsCommContractAddress &&
+      chainContractsData.goalContractEpnsChannelAddress
+    ) {
+      console.log("⚡ Set epns contract and channel addresses");
+      console.log(
+        "🔓 Don't forget to add this contract to epns channel delegates"
+      );
+      await Goal__factory.connect(
+        chainContracts.goal.proxy,
+        deployerWallet
+      ).setEpnsCommContractAddress(
+        chainContractsData.goalContractEpnsCommContractAddress
+      );
+      await Goal__factory.connect(
+        chainContracts.goal.proxy,
+        deployerWallet
+      ).setEpnsChannelAddress(
+        chainContractsData.goalContractEpnsChannelAddress
+      );
+    }
     console.log("⚡ Send contract address to hub");
     await Hub__factory.connect(
       chainContracts.hub.proxy,

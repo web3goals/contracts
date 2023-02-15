@@ -1,6 +1,8 @@
 import hre, { ethers } from "hardhat";
 import {
+  AnyProofURIVerifier__factory,
   Bio__factory,
+  GitHubActivityVerifier__factory,
   Goal__factory,
   Hub__factory,
   Usage__factory,
@@ -33,13 +35,15 @@ async function main() {
       chainName: chain,
       contractName: chainContracts.hub.name,
       contractFactory: new Hub__factory(deployerWallet),
-      contractArgs: [
+      contractInitializeArgs: [
         chainContracts.goal.proxy || ethers.constants.AddressZero,
         chainContracts.usage.proxy || ethers.constants.AddressZero,
         chainContracts.bio.proxy || ethers.constants.AddressZero,
+        [], // TODO: Add verifiers if already deployed
+        [], // TODO: Add verifiers if already deployed
       ],
       isProxyRequired: chainContracts.hub.isUpgreadable,
-      isInitializeRequired: !chainContracts.hub.isUpgreadable,
+      isInitializeRequired: chainContracts.hub.isInitializable,
     });
     chainContracts.hub.proxy = contract.address;
     if (chainContracts.goal.proxy) {
@@ -66,7 +70,51 @@ async function main() {
     return;
   }
 
-  // TODO: Deploy verifiers supported by chain and add it to hub
+  // Deploy verifier contracts
+  for (let i = 0; i < chainContracts.verifiers.length; i++) {
+    const verifier = chainContracts.verifiers[i];
+    if (verifier.contract.proxy) {
+      continue;
+    }
+    let contract;
+    if (verifier.verificationRequirement === "ANY_PROOF_URI") {
+      contract = await deployWithLogs({
+        chainName: chain,
+        contractName: verifier.contract.name,
+        contractFactory: new AnyProofURIVerifier__factory(deployerWallet),
+        contractConstructorArgs: [chainContracts.hub.proxy],
+        isProxyRequired: verifier.contract.isUpgreadable,
+        isInitializeRequired: verifier.contract.isInitializable,
+      });
+    }
+    if (
+      verifier.verificationRequirement === "GITHUB_ACTIVITY" &&
+      chainContractsData.gitHubActivityVerifierContract
+    ) {
+      contract = await deployWithLogs({
+        chainName: chain,
+        contractName: verifier.contract.name,
+        contractFactory: new GitHubActivityVerifier__factory(deployerWallet),
+        contractConstructorArgs: [
+          chainContracts.hub.proxy,
+          chainContractsData.gitHubActivityVerifierContract
+            .chainlinkTokenAddress,
+          chainContractsData.gitHubActivityVerifierContract
+            .chainlinkOracleAddress,
+          chainContractsData.gitHubActivityVerifierContract.chainlinkJobId,
+        ],
+        isProxyRequired: verifier.contract.isUpgreadable,
+        isInitializeRequired: verifier.contract.isInitializable,
+      });
+    }
+    if (contract) {
+      console.log("⚡ Send contract address to hub");
+      await Hub__factory.connect(
+        chainContracts.hub.proxy,
+        deployerWallet
+      ).setVerifierAddress(verifier.verificationRequirement, contract.address);
+    }
+  }
 
   // Deploy or upgrade goal contract
   if (!chainContracts.goal.proxy) {
@@ -74,18 +122,15 @@ async function main() {
       chainName: chain,
       contractName: chainContracts.goal.name,
       contractFactory: new Goal__factory(deployerWallet),
-      contractArgs: [
+      contractInitializeArgs: [
         chainContracts.hub.proxy,
-        chainContractsData.goalContractUsagePercent,
+        chainContractsData.goalContract.usagePercent,
       ],
       isProxyRequired: chainContracts.goal.isUpgreadable,
-      isInitializeRequired: !chainContracts.goal.isUpgreadable,
+      isInitializeRequired: chainContracts.goal.isInitializable,
     });
     chainContracts.goal.proxy = contract.address;
-    if (
-      chainContractsData.goalContractEpnsCommContractAddress &&
-      chainContractsData.goalContractEpnsChannelAddress
-    ) {
+    if (chainContractsData.epnsContract) {
       console.log("⚡ Set epns contract and channel addresses");
       console.log(
         "🔓 Don't forget to add this contract to epns channel delegates"
@@ -93,15 +138,11 @@ async function main() {
       await Goal__factory.connect(
         chainContracts.goal.proxy,
         deployerWallet
-      ).setEpnsCommContractAddress(
-        chainContractsData.goalContractEpnsCommContractAddress
-      );
+      ).setEpnsCommContractAddress(chainContractsData.epnsContract.address);
       await Goal__factory.connect(
         chainContracts.goal.proxy,
         deployerWallet
-      ).setEpnsChannelAddress(
-        chainContractsData.goalContractEpnsChannelAddress
-      );
+      ).setEpnsChannelAddress(chainContractsData.epnsContract.channelAddress);
     }
     console.log("⚡ Send contract address to hub");
     await Hub__factory.connect(
@@ -124,7 +165,7 @@ async function main() {
       contractName: chainContracts.usage.name,
       contractFactory: new Usage__factory(deployerWallet),
       isProxyRequired: chainContracts.usage.isUpgreadable,
-      isInitializeRequired: !chainContracts.usage.isUpgreadable,
+      isInitializeRequired: chainContracts.usage.isInitializable,
     });
     chainContracts.usage.proxy = contract.address;
     console.log("⚡ Send contract address to hub");
@@ -148,7 +189,7 @@ async function main() {
       contractName: chainContracts.bio.name,
       contractFactory: new Bio__factory(deployerWallet),
       isProxyRequired: chainContracts.bio.isUpgreadable,
-      isInitializeRequired: !chainContracts.bio.isUpgreadable,
+      isInitializeRequired: chainContracts.bio.isInitializable,
     });
     chainContracts.bio.proxy = contract.address;
     console.log("⚡ Send contract address to hub");

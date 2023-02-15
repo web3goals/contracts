@@ -5,7 +5,8 @@ export async function deployWithLogs(args: {
   chainName: string;
   contractName: string;
   contractFactory: ContractFactory;
-  contractArgs?: Array<any>;
+  contractConstructorArgs?: Array<any>;
+  contractInitializeArgs?: Array<any>;
   isProxyRequired?: boolean;
   isInitializeRequired?: boolean;
 }): Promise<Contract> {
@@ -15,7 +16,7 @@ export async function deployWithLogs(args: {
     console.log(`\n👟 Start deploy '${args.contractName}' contract with proxy`);
     contract = await upgrades.deployProxy(
       args.contractFactory,
-      args.contractArgs,
+      args.contractInitializeArgs,
       {
         timeout: 180000,
       }
@@ -25,22 +26,38 @@ export async function deployWithLogs(args: {
   // Deploy without proxy
   else {
     console.log(`\n👟 Start deploy '${args.contractName}' contract`);
-    contract = await args.contractFactory.deploy();
+    if (args.contractConstructorArgs) {
+      contract = await args.contractFactory.deploy(
+        ...args.contractConstructorArgs
+      );
+    } else {
+      contract = await args.contractFactory.deploy();
+    }
     await contract.deployed();
     // Use initialize function
     if (args.isInitializeRequired) {
-      if (args.contractArgs) {
-        await contract.initialize(...args.contractArgs);
+      if (args.contractInitializeArgs) {
+        await contract.initialize(...args.contractInitializeArgs);
       } else {
         await contract.initialize();
       }
     }
   }
   console.log("✅ Contract deployed to " + contract.address);
-  console.log(
-    "👉 Command for vefifying: " +
-      `npx hardhat verify --network ${args.chainName} ${contract.address}`
-  );
+  if (args.contractConstructorArgs) {
+    console.log(
+      "👉 Command for vefifying: " +
+        `npx hardhat verify --network ${args.chainName} ${
+          contract.address
+        } ${args.contractConstructorArgs.join(" ")}`
+    );
+  } else {
+    console.log(
+      "👉 Command for vefifying: " +
+        `npx hardhat verify --network ${args.chainName} ${contract.address}`
+    );
+  }
+
   return contract;
 }
 

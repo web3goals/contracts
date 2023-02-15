@@ -58,15 +58,15 @@ contract Hub is IHub, OwnableUpgradeable {
     }
 
     function getVerifierAddress(
-        string memory verifierName
+        string memory verificationRequirement
     ) public view returns (address) {
-        return _verifierAddresses[verifierName];
+        return _verifierAddresses[verificationRequirement];
     }
 
     function setVerifierAddress(
-        string memory verifierName,
+        string memory verificationRequirement,
         address verifierAddress
     ) public onlyOwner {
-        _verifierAddresses[verifierName] = verifierAddress;
+        _verifierAddresses[verificationRequirement] = verifierAddress;
     }
 }

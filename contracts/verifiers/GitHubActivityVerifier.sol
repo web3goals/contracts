@@ -30,11 +30,11 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
         address hubAddress,
         address chainlinkTokenAddress,
         address chainlinkOracleAddress,
-        string memory jobId
+        string memory chainlinkJobId
     ) Verifier(hubAddress) {
         setChainlinkToken(chainlinkTokenAddress);
         setChainlinkOracle(chainlinkOracleAddress);
-        _jobId = bytes32(bytes(jobId));
+        _jobId = bytes32(bytes(chainlinkJobId));
         _fee = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18 (Varies by network and job)
     }
 

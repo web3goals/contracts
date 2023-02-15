@@ -6,13 +6,15 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "./interfaces/IHub.sol";
+import "./interfaces/IVerifier.sol";
 import "./interfaces/IPUSHCommInterface.sol";
 import "./libraries/DataTypes.sol";
 import "./libraries/Errors.sol";
 import "./libraries/Constants.sol";
 
 /**
- * Contract to set, close goals and become a goals watcher.
+ * Contract to set, verify, close goals and become a goals watcher.
  */
 contract Goal is
     ERC721URIStorageUpgradeable,
@@ -21,7 +23,7 @@ contract Goal is
 {
     using Counters for Counters.Counter;
 
-    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams params);
+    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams);
     event WatcherSet(
         uint256 indexed tokenId,
         address indexed watcherAccountAddress,
@@ -32,11 +34,12 @@ contract Goal is
     event ClosedAsFailed(uint256 indexed tokenId);
 
     address private _hubAddress;
-    address private _epnsCommContractAddress;
-    address private _epnsChannelAddress;
+    address private _epnsCommContractAddress; // TODO: Move to hub contract
+    address private _epnsChannelAddress; // TODO: Move to hub contract
     uint private _usageFeePercent;
     Counters.Counter private _counter;
     mapping(uint256 => DataTypes.GoalParams) private _params;
+    mapping(uint256 => mapping(string => string)) _verificationData;
     mapping(uint256 => DataTypes.GoalWatcher[]) private _watchers;
 
     function initialize(
@@ -53,9 +56,12 @@ contract Goal is
     function set(
         string memory uri,
         uint stake,
-        uint deadlineTimestamp
+        uint deadlineTimestamp,
+        string memory verificationRequirement,
+        string[] memory verificationDataKeys,
+        string[] memory verificationDataValues
     ) public payable returns (uint256) {
-        // Checks
+        // Base checks
         _requireNotPaused();
         require(
             msg.value == stake,
@@ -65,6 +71,11 @@ contract Goal is
         require(
             deadlineTimestamp > block.timestamp + Constants.SECONDS_PER_DAY,
             Errors.MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP
+        );
+        require(
+            IHub(_hubAddress).getVerifierAddress(verificationRequirement) !=
+                address(0),
+            Errors.NOT_FOUND_VERIFIER_FOR_GOAL_VERIFICATION_REQUIREMENT
         );
         // Update counter
         _counter.increment();
@@ -79,10 +90,16 @@ contract Goal is
             deadlineTimestamp,
             false,
             false,
-            ""
+            verificationRequirement
         );
         _params[newTokenId] = tokenParams;
         emit ParamsSet(newTokenId, tokenParams);
+        // Set verification data
+        _addVerificationData(
+            newTokenId,
+            verificationDataKeys,
+            verificationDataValues
+        );
         // Set uri
         _setTokenURI(newTokenId, uri);
         emit URISet(newTokenId, uri);
@@ -91,7 +108,7 @@ contract Goal is
     }
 
     function watch(uint256 tokenId, string memory extraDataURI) public {
-        // Checks
+        // Base Checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
         require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
@@ -121,6 +138,7 @@ contract Goal is
             _epnsChannelAddress != address(0)
         ) {
             // TODO: Move notification texts to variables
+            // TODO: Move notification code to internal function
             IPUSHCommInterface(_epnsCommContractAddress).sendNotification(
                 _epnsChannelAddress, // from channel - recommended to set channel via dApp and put it's value -> then once contract is deployed, go back and add the contract address as delegate for your channel
                 _params[tokenId].authorAddress, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
@@ -147,7 +165,7 @@ contract Goal is
     }
 
     function acceptWatcher(uint256 tokenId, address watcherAddress) public {
-        // Checks
+        // Base checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
         require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
@@ -173,8 +191,16 @@ contract Goal is
         emit WatcherSet(tokenId, watcher.accountAddress, watcher);
     }
 
-    function closeAsAchieved(uint256 tokenId, string memory proofURI) public {
-        // Checks
+    function verify(uint tokenId) public {
+        addVerificationDataAndVerify(tokenId, new string[](0), new string[](0));
+    }
+
+    function addVerificationDataAndVerify(
+        uint tokenId,
+        string[] memory verificationDataKeys,
+        string[] memory verificationDataValues
+    ) public {
+        // Base Checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
         require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
@@ -182,60 +208,81 @@ contract Goal is
             _params[tokenId].authorAddress == msg.sender,
             Errors.SENDER_IS_NOT_GOAL_AUTHOR
         );
-        require(
-            _params[tokenId].deadlineTimestamp > block.timestamp,
-            Errors.GOAL_DEADLINE_HAS_PASSED
+        // Add verification data
+        _addVerificationData(
+            tokenId,
+            verificationDataKeys,
+            verificationDataValues
         );
-        // Update params
-        _params[tokenId].isClosed = true;
-        _params[tokenId].isAchieved = true;
-        _params[tokenId].proofURI = proofURI;
-        // Emit events
-        emit ParamsSet(tokenId, _params[tokenId]);
-        emit ClosedAsAchieved(tokenId);
-        // Return stake
-        (bool sent, ) = _params[tokenId].authorAddress.call{
-            value: _params[tokenId].authorStake
-        }("");
-        require(sent, Errors.FAIL_TO_RETURN_AUTHOR_STAKE);
+        // Verify
+        IVerifier(_getVerifierAddress(tokenId)).verify(tokenId);
     }
 
-    function closeAsFailed(uint256 tokenId) public {
-        // Checks
+    function getVerificationStatus(
+        uint tokenId
+    ) public view returns (bool isAchieved, bool isFailed) {
+        return
+            IVerifier(_getVerifierAddress(tokenId)).getVerificationStatus(
+                tokenId
+            );
+    }
+
+    function close(uint256 tokenId) public {
+        // Base checks
         _requireNotPaused();
         require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
         require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
-        if (
-            _params[tokenId].deadlineTimestamp > block.timestamp &&
-            _params[tokenId].authorAddress != msg.sender
-        ) {
-            revert(Errors.ONLY_GOAL_AUTHOR_CAN_CLOSE_GOAL_BEFORE_DEADLINE);
+        // Try close as achieved by goal author if deadline has not passed
+        if (_params[tokenId].deadlineTimestamp > block.timestamp) {
+            require(
+                _params[tokenId].authorAddress == msg.sender,
+                Errors.SENDER_IS_NOT_GOAL_AUTHOR
+            );
+            (bool isVerificationStatusAchieved, ) = IVerifier(
+                _getVerifierAddress(tokenId)
+            ).getVerificationStatus(tokenId);
+            require(
+                isVerificationStatusAchieved,
+                Errors.GOAL_VERIFICATION_STATUS_IS_NOT_ACHIEVED
+            );
+            _params[tokenId].isClosed = true;
+            _params[tokenId].isAchieved = true;
+            // Emit events
+            emit ParamsSet(tokenId, _params[tokenId]);
+            emit ClosedAsAchieved(tokenId);
+            // Return stake
+            (bool sent, ) = _params[tokenId].authorAddress.call{
+                value: _params[tokenId].authorStake
+            }("");
+            require(sent, Errors.FAIL_TO_RETURN_AUTHOR_STAKE);
         }
-        // Update params
-        _params[tokenId].isClosed = true;
-        _params[tokenId].isAchieved = false;
-        // Emit events
-        emit ParamsSet(tokenId, _params[tokenId]);
-        emit ClosedAsFailed(tokenId);
-        // Define number of accepted watchers
-        uint acceptedWatchersNumber = 0;
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].isAccepted) {
-                acceptedWatchersNumber++;
+        // Close as failed if deadline has passed
+        else {
+            _params[tokenId].isClosed = true;
+            _params[tokenId].isAchieved = false;
+            // Emit events
+            emit ParamsSet(tokenId, _params[tokenId]);
+            emit ClosedAsFailed(tokenId);
+            // Define number of accepted watchers
+            uint acceptedWatchersNumber = 0;
+            for (uint i = 0; i < _watchers[tokenId].length; i++) {
+                if (_watchers[tokenId][i].isAccepted) {
+                    acceptedWatchersNumber++;
+                }
             }
-        }
-        // Send stake to accepted watchers
-        if (acceptedWatchersNumber == 0) {
-            return;
-        }
-        uint watcherStakePart = _params[tokenId].authorStake /
-            acceptedWatchersNumber;
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].isAccepted) {
-                (bool sent, ) = _watchers[tokenId][i].accountAddress.call{
-                    value: watcherStakePart
-                }("");
-                require(sent, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER);
+            // Send stake to accepted watchers
+            if (acceptedWatchersNumber == 0) {
+                return;
+            }
+            uint watcherStakePart = _params[tokenId].authorStake /
+                acceptedWatchersNumber;
+            for (uint i = 0; i < _watchers[tokenId].length; i++) {
+                if (_watchers[tokenId][i].isAccepted) {
+                    (bool sent, ) = _watchers[tokenId][i].accountAddress.call{
+                        value: watcherStakePart
+                    }("");
+                    require(sent, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER);
+                }
             }
         }
     }
@@ -294,10 +341,46 @@ contract Goal is
         return _params[tokenId];
     }
 
+    function getVerificationData(
+        uint256 tokenId,
+        string memory key
+    ) public view returns (string memory) {
+        return _verificationData[tokenId][key];
+    }
+
     function getWatchers(
         uint256 tokenId
     ) public view returns (DataTypes.GoalWatcher[] memory) {
         return _watchers[tokenId];
+    }
+
+    function _getVerifierAddress(
+        uint256 tokenId
+    ) internal view returns (address) {
+        address verifierAddress = IHub(_hubAddress).getVerifierAddress(
+            _params[tokenId].verificationRequirement
+        );
+        require(
+            verifierAddress != address(0),
+            Errors.NOT_FOUND_VERIFIER_FOR_GOAL_VERIFICATION_REQUIREMENT
+        );
+        return verifierAddress;
+    }
+
+    function _addVerificationData(
+        uint256 tokenId,
+        string[] memory verificationDataKeys,
+        string[] memory verificationDataValues
+    ) internal {
+        require(
+            verificationDataKeys.length == verificationDataValues.length,
+            Errors.ARRAYS_MUST_HAVE_THE_SAME_LENGTH
+        );
+        for (uint i = 0; i < verificationDataKeys.length; i++) {
+            _verificationData[tokenId][
+                verificationDataKeys[i]
+            ] = verificationDataValues[i];
+        }
     }
 
     /**

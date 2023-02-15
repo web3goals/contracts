@@ -20,6 +20,9 @@ makeSuiteCleanRoom("Goal Accepting Watchers", function () {
           goalParams.one.uri,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
           {
             value: goalParams.one.stake,
           }

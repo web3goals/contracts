@@ -16,7 +16,7 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Closing", function () {
-  it("Goal author should be able to close a goal as achieved and return stake", async function () {
+  it("Goal author should be able to close a goal after verification as achieved and return stake", async function () {
     // Set goal
     await expect(
       goalContract
@@ -25,6 +25,9 @@ makeSuiteCleanRoom("Goal Closing", function () {
           goalParams.one.uri,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
           {
             value: goalParams.one.stake,
           }
@@ -32,11 +35,19 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.be.not.reverted;
     // Get set goal id
     const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
-    // Close goal
+    // Verify goal
     await expect(
       goalContract
         .connect(userOne)
-        .closeAsAchieved(setGoalId, goalParams.one.proofUri)
+        .addVerificationDataAndVerify(
+          setGoalId,
+          goalParams.one.additionalVerificationDataKeys,
+          goalParams.one.additionalVerificationDataValues
+        )
+    ).to.be.not.reverted;
+    // Close goal
+    await expect(
+      goalContract.connect(userOne).close(setGoalId)
     ).to.changeEtherBalances(
       [userOne, goalContract.address],
       [
@@ -48,10 +59,9 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
-    expect(params.proofURI).to.equal(goalParams.one.proofUri);
   });
 
-  it("Goal author should be able to close a goal as failed and not return stake", async function () {
+  it("Goal author should be able to close a goal after deadline as failed and not return stake", async function () {
     // Set goal
     await expect(
       goalContract
@@ -60,6 +70,9 @@ makeSuiteCleanRoom("Goal Closing", function () {
           goalParams.one.uri,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
           {
             value: goalParams.one.stake,
           }
@@ -67,9 +80,11 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.be.not.reverted;
     // Get set goal id
     const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
+    // Increase network time
+    await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
-      goalContract.connect(userOne).closeAsFailed(setGoalId)
+      goalContract.connect(userOne).close(setGoalId)
     ).to.changeEtherBalances(
       [userOne, goalContract.address],
       [ethers.constants.Zero, ethers.constants.Zero]
@@ -80,7 +95,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(params.isAchieved).to.equal(false);
   });
 
-  it("Accepted goal watcher should be able to close a goal as failed and receive a part of stake", async function () {
+  it("Accepted goal watcher should be able to close a goal after deadline as failed and receive a part of stake", async function () {
     // Set goal by user onw
     await expect(
       goalContract
@@ -89,6 +104,9 @@ makeSuiteCleanRoom("Goal Closing", function () {
           goalParams.one.uri,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
           {
             value: goalParams.one.stake,
           }
@@ -119,7 +137,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal by user two
     await expect(
-      goalContract.connect(userTwo).closeAsFailed(setGoalId)
+      goalContract.connect(userTwo).close(setGoalId)
     ).to.changeEtherBalances(
       [userTwo, userThree, goalContract.address],
       [

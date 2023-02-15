@@ -2,16 +2,13 @@ import { expect } from "chai";
 import {
   goalContract,
   goalParams,
-  goalWatcherExtraDataUris,
   makeSuiteCleanRoom,
   userOne,
-  userThree,
-  userTwo,
 } from "../../setup";
 
-makeSuiteCleanRoom("Goal Watching", function () {
-  it("User should be able to watch a goal", async function () {
-    // Set a goal by user one
+makeSuiteCleanRoom("Goal Verifying", function () {
+  it("User should be able to set a goal and verify it with any proof uri", async function () {
+    // Set goal
     await expect(
       goalContract
         .connect(userOne)
@@ -29,20 +26,21 @@ makeSuiteCleanRoom("Goal Watching", function () {
     ).to.be.not.reverted;
     // Get set goal id
     const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
-    // Watch goal by user two
+    // Verify goal
     await expect(
       goalContract
-        .connect(userTwo)
-        .watch(setGoalId, goalWatcherExtraDataUris.one)
+        .connect(userOne)
+        .addVerificationDataAndVerify(
+          setGoalId,
+          goalParams.one.additionalVerificationDataKeys,
+          goalParams.one.additionalVerificationDataValues
+        )
     ).to.be.not.reverted;
-    // Watch goal by user three
-    await expect(
-      goalContract
-        .connect(userThree)
-        .watch(setGoalId, goalWatcherExtraDataUris.two)
-    ).to.be.not.reverted;
-    // Check goal watchers
-    const watchers = await goalContract.getWatchers(setGoalId);
-    expect(watchers.length).to.be.equal(2);
+    // Check goal verification status
+    const verificationStatus = await goalContract.getVerificationStatus(
+      setGoalId
+    );
+    expect(verificationStatus.isAchieved).to.equal(true);
+    expect(verificationStatus.isFailed).to.equal(true);
   });
 });

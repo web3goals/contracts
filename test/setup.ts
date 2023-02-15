@@ -1,6 +1,8 @@
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import {
+  AnyProofURIVerifier,
+  AnyProofURIVerifier__factory,
   Bio,
   Bio__factory,
   Goal,
@@ -22,12 +24,24 @@ export const goalContractParams = {
   usageFeePercent: 10,
 };
 
+export const goalVerificationRequirements = {
+  anyProofUri: "ANY_PROOF_URI",
+};
+
+export const goalVerificationDataKeys = {
+  anyProofUri: "ANY_PROOF_URI",
+};
+
 export const goalParams = {
   one: {
     uri: "ipfs://...",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
-    proofUri: "ipfs://...",
+    verificationRequirement: goalVerificationRequirements.anyProofUri,
+    verificationDataKeys: [],
+    verificationDataValues: [],
+    additionalVerificationDataKeys: [goalVerificationDataKeys.anyProofUri],
+    additionalVerificationDataValues: ["ipfs://..."],
   },
 };
 
@@ -53,6 +67,7 @@ export let userTwoAddress: string;
 export let userThreeAddress: string;
 
 export let hubContract: Hub;
+export let anyProofUriVerifier: AnyProofURIVerifier;
 export let goalContract: Goal;
 export let usageContract: Usage;
 export let bioContract: Bio;
@@ -88,7 +103,14 @@ before(async function () {
   await hubContract.initialize(
     ethers.constants.AddressZero,
     ethers.constants.AddressZero,
-    ethers.constants.AddressZero
+    ethers.constants.AddressZero,
+    [],
+    []
+  );
+
+  // Deploy verifiers contracts
+  anyProofUriVerifier = await new AnyProofURIVerifier__factory(deployer).deploy(
+    hubContract.address
   );
 
   // Deploy goal contract
@@ -107,6 +129,12 @@ before(async function () {
   await bioContract.initialize();
 
   // Set hub addresses
+  await expect(
+    hubContract.setVerifierAddress(
+      goalVerificationRequirements.anyProofUri,
+      anyProofUriVerifier.address
+    )
+  ).to.be.not.reverted;
   await expect(
     hubContract.setGoalAddress(goalContract.address)
   ).to.be.not.reverted;

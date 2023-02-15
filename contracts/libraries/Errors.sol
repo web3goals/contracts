@@ -8,6 +8,7 @@ library Errors {
         "Token is non-transferable";
     string internal constant ARRAYS_MUST_HAVE_THE_SAME_LENGTH =
         "Arrays must have the same length";
+    string internal constant UNABLE_TO_TRANSFER = "Unable to transfer";
 
     // Goal contract
     string internal constant STAKE_MUST_BE_EQUAL_TO_MESSAGE_VALUE =
@@ -42,4 +43,7 @@ library Errors {
         "Sender is not goal contract";
     string internal constant GOAL_DOES_NOT_HAVE_ANY_PROOF_URI =
         "Goal does not any proof URI";
+    string
+        internal constant GOAL_DOES_NOT_HAVE_GITHUB_USERNAME_OR_ACTIVITY_DAYS =
+        "Goal does not have github username or activity days";
 }

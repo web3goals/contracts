@@ -8,7 +8,7 @@ import "../interfaces/IGoal.sol";
 import "../libraries/Errors.sol";
 
 /**
- * Contract to verify a goal with any proof uri.
+ * Contract to verify a goal by any proof uri.
  */
 contract AnyProofURIVerifier is Verifier {
     string _anyProofUriKey = "ANY_PROOF_URI";

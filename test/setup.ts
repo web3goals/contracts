@@ -1,8 +1,8 @@
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import {
-  AnyProofURIVerifier,
-  AnyProofURIVerifier__factory,
+  AnyProofVerifier,
+  AnyProofVerifier__factory,
   Bio,
   Bio__factory,
   Goal,
@@ -25,11 +25,11 @@ export const goalContractParams = {
 };
 
 export const goalVerificationRequirements = {
-  anyProofUri: "ANY_PROOF_URI",
+  anyProof: "ANY_PROOF",
 };
 
 export const goalVerificationDataKeys = {
-  anyProofUri: "ANY_PROOF_URI",
+  anyUri: "ANY_URI",
 };
 
 export const goalParams = {
@@ -37,10 +37,10 @@ export const goalParams = {
     uri: "ipfs://...",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
-    verificationRequirement: goalVerificationRequirements.anyProofUri,
+    verificationRequirement: goalVerificationRequirements.anyProof,
     verificationDataKeys: [],
     verificationDataValues: [],
-    additionalVerificationDataKeys: [goalVerificationDataKeys.anyProofUri],
+    additionalVerificationDataKeys: [goalVerificationDataKeys.anyUri],
     additionalVerificationDataValues: ["ipfs://..."],
   },
 };
@@ -67,7 +67,7 @@ export let userTwoAddress: string;
 export let userThreeAddress: string;
 
 export let hubContract: Hub;
-export let anyProofUriVerifier: AnyProofURIVerifier;
+export let anyProofVerifier: AnyProofVerifier;
 export let goalContract: Goal;
 export let usageContract: Usage;
 export let bioContract: Bio;
@@ -109,7 +109,7 @@ before(async function () {
   );
 
   // Deploy verifiers contracts
-  anyProofUriVerifier = await new AnyProofURIVerifier__factory(deployer).deploy(
+  anyProofVerifier = await new AnyProofVerifier__factory(deployer).deploy(
     hubContract.address
   );
 
@@ -131,8 +131,8 @@ before(async function () {
   // Set hub addresses
   await expect(
     hubContract.setVerifierAddress(
-      goalVerificationRequirements.anyProofUri,
-      anyProofUriVerifier.address
+      goalVerificationRequirements.anyProof,
+      anyProofVerifier.address
     )
   ).to.be.not.reverted;
   await expect(

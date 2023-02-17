@@ -1,6 +1,6 @@
 import hre, { ethers } from "hardhat";
 import {
-  AnyProofURIVerifier__factory,
+  AnyProofVerifier__factory,
   Bio__factory,
   GitHubActivityVerifier__factory,
   Goal__factory,
@@ -80,11 +80,11 @@ async function main() {
       continue;
     }
     let contract;
-    if (verifier.verificationRequirement === "ANY_PROOF_URI") {
+    if (verifier.verificationRequirement === "ANY_PROOF") {
       contract = await deployWithLogs({
         chainName: chain,
         contractName: verifier.contract.name,
-        contractFactory: new AnyProofURIVerifier__factory(deployerWallet),
+        contractFactory: new AnyProofVerifier__factory(deployerWallet),
         contractConstructorArgs: [chainContracts.hub.proxy],
         isProxyRequired: verifier.contract.isUpgreadable,
         isInitializeRequired: verifier.contract.isInitializable,

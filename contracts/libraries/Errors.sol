@@ -41,8 +41,8 @@ library Errors {
     // Verifier contracts
     string internal constant SENDER_IS_NOT_GOAL_CONTRACT =
         "Sender is not goal contract";
-    string internal constant GOAL_DOES_NOT_HAVE_ANY_PROOF_URI =
-        "Goal does not have any proof URI";
+    string internal constant GOAL_DOES_NOT_HAVE_ANY_PROOF =
+        "Goal does not have any proof";
     string
         internal constant GOAL_DOES_NOT_HAVE_GITHUB_USERNAME_OR_ACTIVITY_DAYS =
         "Goal does not have github username or activity days";

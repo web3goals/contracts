@@ -14,7 +14,7 @@ export const deployedContracts: {
     usage: DeployedContract;
     bio: DeployedContract;
     verifiers: Array<{
-      verificationRequirement: "ANY_PROOF_URI" | "GITHUB_ACTIVITY";
+      verificationRequirement: "ANY_PROOF" | "GITHUB_ACTIVITY";
       contract: DeployedContract;
     }>;
   };
@@ -54,9 +54,9 @@ export const deployedContracts: {
     },
     verifiers: [
       {
-        verificationRequirement: "ANY_PROOF_URI",
+        verificationRequirement: "ANY_PROOF",
         contract: {
-          name: "AnyProofURIVerifier",
+          name: "AnyProofVerifier",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0x32A5425CDA456BF7162eC42300FeCd344b20F941",
@@ -106,9 +106,9 @@ export const deployedContracts: {
     },
     verifiers: [
       {
-        verificationRequirement: "ANY_PROOF_URI",
+        verificationRequirement: "ANY_PROOF",
         contract: {
-          name: "AnyProofURIVerifier",
+          name: "AnyProofVerifier",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0x4518BA8A80a1555402A4c75D631c36338b5b58c4",
@@ -148,9 +148,9 @@ export const deployedContracts: {
     },
     verifiers: [
       {
-        verificationRequirement: "ANY_PROOF_URI",
+        verificationRequirement: "ANY_PROOF",
         contract: {
-          name: "AnyProofURIVerifier",
+          name: "AnyProofVerifier",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",

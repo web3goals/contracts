@@ -80,15 +80,15 @@ export const deployedContracts: {
       name: "Hub",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
-      impl: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
+      proxy: "0xFB22c49674E4482C22D4499392a8e2f760D84f8d",
+      impl: "0xFB22c49674E4482C22D4499392a8e2f760D84f8d",
     },
     goal: {
       name: "Goal",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0x63a465e2C7Ca890430f81B7cE8Ad86bc9A4512DD",
-      impl: "0x63a465e2C7Ca890430f81B7cE8Ad86bc9A4512DD",
+      proxy: "0xc254cDd94b834966DB91e99bb6aE073Df3F55Bd7",
+      impl: "0xc254cDd94b834966DB91e99bb6aE073Df3F55Bd7",
     },
     usage: {
       name: "Usage",
@@ -104,22 +104,33 @@ export const deployedContracts: {
       proxy: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
       impl: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
     },
-    verifiers: [],
+    verifiers: [
+      {
+        verificationRequirement: "ANY_PROOF_URI",
+        contract: {
+          name: "AnyProofURIVerifier",
+          isUpgreadable: false,
+          isInitializable: false,
+          proxy: "0x4518BA8A80a1555402A4c75D631c36338b5b58c4",
+          impl: "0x4518BA8A80a1555402A4c75D631c36338b5b58c4",
+        },
+      },
+    ],
   },
   mantleTestnet: {
     hub: {
       name: "Hub",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0x02008a8DBc938bd7930bf370617065B6B0c1221a",
-      impl: "0x02008a8DBc938bd7930bf370617065B6B0c1221a",
+      proxy: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
+      impl: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
     },
     goal: {
       name: "Goal",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0x1e4712A93beEc0aa26151CF44061eE91DD56f921",
-      impl: "0x1e4712A93beEc0aa26151CF44061eE91DD56f921",
+      proxy: "0x306FC512C947c66b00b3436C74c85d163a89C5Aa",
+      impl: "0x306FC512C947c66b00b3436C74c85d163a89C5Aa",
     },
     usage: {
       name: "Usage",
@@ -135,7 +146,18 @@ export const deployedContracts: {
       proxy: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
       impl: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
     },
-    verifiers: [],
+    verifiers: [
+      {
+        verificationRequirement: "ANY_PROOF_URI",
+        contract: {
+          name: "AnyProofURIVerifier",
+          isUpgreadable: false,
+          isInitializable: false,
+          proxy: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
+          impl: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
+        },
+      },
+    ],
   },
 };
 

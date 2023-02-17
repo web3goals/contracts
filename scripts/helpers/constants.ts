@@ -32,9 +32,9 @@ export const deployedContracts: {
       name: "Goal",
       isUpgreadable: true,
       isInitializable: true,
-      proxy: "0xc2D858Bec57a6daCF206eA78e5DA3F05428A29fe",
+      proxy: "0x226bEd02252BAB7b161a3762614d8e3Ec5012862",
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
-      impl: "0x5948b9750e99A48371c8F3cF9584470E0C28A2a3",
+      impl: "0x73Ba60093e1b7208831FbA9160aFA4A15E773686",
     },
     usage: {
       name: "Usage",
@@ -87,8 +87,8 @@ export const deployedContracts: {
       name: "Goal",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0xc254cDd94b834966DB91e99bb6aE073Df3F55Bd7",
-      impl: "0xc254cDd94b834966DB91e99bb6aE073Df3F55Bd7",
+      proxy: "0x1F2c31D5034F27A4352Bc6ca0fc72cdC32809808",
+      impl: "0x1F2c31D5034F27A4352Bc6ca0fc72cdC32809808",
     },
     usage: {
       name: "Usage",
@@ -129,8 +129,8 @@ export const deployedContracts: {
       name: "Goal",
       isUpgreadable: false,
       isInitializable: true,
-      proxy: "0x306FC512C947c66b00b3436C74c85d163a89C5Aa",
-      impl: "0x306FC512C947c66b00b3436C74c85d163a89C5Aa",
+      proxy: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
+      impl: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
     },
     usage: {
       name: "Usage",

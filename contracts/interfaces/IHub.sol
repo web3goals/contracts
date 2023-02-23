@@ -6,7 +6,7 @@ interface IHub {
 
     function getUsageAddress() external view returns (address);
 
-    function getBioAddress() external view returns (address);
+    function getProfileAddress() external view returns (address);
 
     function getVerifierAddress(
         string memory verifierName

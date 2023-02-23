@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Bio__factory } from "../typechain-types";
+import { Profile__factory } from "../typechain-types";
 
 async function main() {
   // Init account
@@ -9,7 +9,7 @@ async function main() {
   );
 
   // Execute transaction
-  const transaction = await Bio__factory.connect(
+  const transaction = await Profile__factory.connect(
     "0xBfd1b773C4Af9C430883EDC9e70D4b4a4BF8E4d2",
     accountWallet
   ).name();

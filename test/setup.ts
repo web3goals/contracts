@@ -3,12 +3,12 @@ import { ethers } from "hardhat";
 import {
   AnyProofVerifier,
   AnyProofVerifier__factory,
-  Bio,
-  Bio__factory,
   Goal,
   Goal__factory,
   Hub,
   Hub__factory,
+  Profile,
+  Profile__factory,
   Usage,
   Usage__factory,
 } from "../typechain-types";
@@ -50,7 +50,7 @@ export const goalWatcherExtraDataUris = {
   two: "ipfs://two",
 };
 
-export const bioUris = {
+export const profileUris = {
   one: "ipfs://one",
   two: "ipfs://two",
 };
@@ -70,7 +70,7 @@ export let hubContract: Hub;
 export let anyProofVerifier: AnyProofVerifier;
 export let goalContract: Goal;
 export let usageContract: Usage;
-export let bioContract: Bio;
+export let profileContract: Profile;
 
 export function makeSuiteCleanRoom(name: string, tests: () => void) {
   return describe(name, () => {
@@ -124,9 +124,9 @@ before(async function () {
   usageContract = await new Usage__factory(deployer).deploy();
   await usageContract.initialize();
 
-  // Deploy bio contract
-  bioContract = await new Bio__factory(deployer).deploy();
-  await bioContract.initialize();
+  // Deploy profile contract
+  profileContract = await new Profile__factory(deployer).deploy();
+  await profileContract.initialize();
 
   // Set hub addresses
   await expect(
@@ -142,6 +142,6 @@ before(async function () {
     hubContract.setUsageAddress(usageContract.address)
   ).to.be.not.reverted;
   await expect(
-    hubContract.setBioAddress(bioContract.address)
+    hubContract.setProfileAddress(profileContract.address)
   ).to.be.not.reverted;
 });

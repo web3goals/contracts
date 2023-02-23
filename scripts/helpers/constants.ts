@@ -13,7 +13,7 @@ export const deployedContracts: {
     hub: DeployedContract;
     goal: DeployedContract;
     usage: DeployedContract;
-    bio: DeployedContract;
+    profile: DeployedContract;
     verifiers: Array<{
       verificationRequirement: "ANY_PROOF" | "GITHUB_ACTIVITY";
       contract: DeployedContract;
@@ -48,8 +48,8 @@ export const deployedContracts: {
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
       impl: "0x4E0F7e80BE66571ACBaF8C7410a55f91f41D10B0",
     },
-    bio: {
-      name: "Bio",
+    profile: {
+      name: "Profile",
       version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
@@ -107,8 +107,8 @@ export const deployedContracts: {
       proxy: "0x9b18515b74eF6115A673c6D01C454D8F72f84177",
       impl: "0x9b18515b74eF6115A673c6D01C454D8F72f84177",
     },
-    bio: {
-      name: "Bio",
+    profile: {
+      name: "Profile",
       version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
@@ -154,8 +154,8 @@ export const deployedContracts: {
       proxy: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
       impl: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
     },
-    bio: {
-      name: "Bio",
+    profile: {
+      name: "Profile",
       version: "0.1",
       isUpgreadable: false,
       isInitializable: true,

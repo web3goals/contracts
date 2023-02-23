@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./libraries/Errors.sol";
 
 /**
- * Contract to stores links to account biographies.
+ * Contract to store accounts profile data.
  */
-contract Bio is ERC721URIStorageUpgradeable {
+contract Profile is ERC721URIStorageUpgradeable {
     using Counters for Counters.Counter;
 
     event URISet(uint256 indexed tokenId, string tokenURI);

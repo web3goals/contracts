@@ -1,10 +1,10 @@
 import hre, { ethers } from "hardhat";
 import {
   AnyProofVerifier__factory,
-  Bio__factory,
   GitHubActivityVerifier__factory,
   Goal__factory,
   Hub__factory,
+  Profile__factory,
   Usage__factory,
 } from "../typechain-types";
 import { contractsData, deployedContracts } from "./helpers/constants";
@@ -41,7 +41,7 @@ async function main() {
       contractInitializeArgs: [
         chainContracts.goal.proxy || ethers.constants.AddressZero,
         chainContracts.usage.proxy || ethers.constants.AddressZero,
-        chainContracts.bio.proxy || ethers.constants.AddressZero,
+        chainContracts.profile.proxy || ethers.constants.AddressZero,
         [], // TODO: Add verifiers if already deployed
         [], // TODO: Add verifiers if already deployed
       ],
@@ -185,27 +185,30 @@ async function main() {
     );
   }
 
-  // Deploy or upgrade bio contract
-  if (!chainContracts.bio.proxy) {
+  // Deploy or upgrade profile contract
+  if (!chainContracts.profile.proxy) {
     const contract = await deployWithLogs({
       chainName: chain,
-      contractName: chainContracts.bio.name,
-      contractFactory: new Bio__factory(deployerWallet),
-      isProxyRequired: chainContracts.bio.isUpgreadable,
-      isInitializeRequired: chainContracts.bio.isInitializable,
+      contractName: chainContracts.profile.name,
+      contractFactory: new Profile__factory(deployerWallet),
+      isProxyRequired: chainContracts.profile.isUpgreadable,
+      isInitializeRequired: chainContracts.profile.isInitializable,
     });
-    chainContracts.bio.proxy = contract.address;
+    chainContracts.profile.proxy = contract.address;
     console.log("⚡ Send contract address to hub");
     await Hub__factory.connect(
       chainContracts.hub.proxy,
       deployerWallet
-    ).setBioAddress(contract.address);
-  } else if (chainContracts.bio.isUpgreadable && !chainContracts.bio.impl) {
+    ).setProfileAddress(contract.address);
+  } else if (
+    chainContracts.profile.isUpgreadable &&
+    !chainContracts.profile.impl
+  ) {
     await upgradeProxyWithLogs(
       chain,
-      chainContracts.bio.name,
-      chainContracts.bio.proxy,
-      new Bio__factory(deployerWallet)
+      chainContracts.profile.name,
+      chainContracts.profile.proxy,
+      new Profile__factory(deployerWallet)
     );
   }
 }

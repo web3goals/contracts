@@ -291,7 +291,7 @@ contract Goal is
         _pause();
     }
 
-    function uppause() public onlyOwner {
+    function unpause() public onlyOwner {
         _unpause();
     }
 

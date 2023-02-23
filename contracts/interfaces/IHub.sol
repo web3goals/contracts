@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 interface IHub {
     function getGoalAddress() external view returns (address);
 
-    function getUsageAddress() external view returns (address);
+    function getKeeperAddress() external view returns (address);
 
     function getProfileAddress() external view returns (address);
 

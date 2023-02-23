@@ -4,8 +4,8 @@ import {
   GitHubActivityVerifier__factory,
   Goal__factory,
   Hub__factory,
+  Keeper__factory,
   Profile__factory,
-  Usage__factory,
 } from "../typechain-types";
 import { contractsData, deployedContracts } from "./helpers/constants";
 import { deployWithLogs, upgradeProxyWithLogs } from "./helpers/utils";
@@ -40,7 +40,7 @@ async function main() {
       contractFactory: new Hub__factory(deployerWallet),
       contractInitializeArgs: [
         chainContracts.goal.proxy || ethers.constants.AddressZero,
-        chainContracts.usage.proxy || ethers.constants.AddressZero,
+        chainContracts.keeper.proxy || ethers.constants.AddressZero,
         chainContracts.profile.proxy || ethers.constants.AddressZero,
         [], // TODO: Add verifiers if already deployed
         [], // TODO: Add verifiers if already deployed
@@ -161,27 +161,30 @@ async function main() {
     );
   }
 
-  // Deploy or upgrade usage contract
-  if (!chainContracts.usage.proxy) {
+  // Deploy or upgrade keeper contract
+  if (!chainContracts.keeper.proxy) {
     const contract = await deployWithLogs({
       chainName: chain,
-      contractName: chainContracts.usage.name,
-      contractFactory: new Usage__factory(deployerWallet),
-      isProxyRequired: chainContracts.usage.isUpgreadable,
-      isInitializeRequired: chainContracts.usage.isInitializable,
+      contractName: chainContracts.keeper.name,
+      contractFactory: new Keeper__factory(deployerWallet),
+      isProxyRequired: chainContracts.keeper.isUpgreadable,
+      isInitializeRequired: chainContracts.keeper.isInitializable,
     });
-    chainContracts.usage.proxy = contract.address;
+    chainContracts.keeper.proxy = contract.address;
     console.log("⚡ Send contract address to hub");
     await Hub__factory.connect(
       chainContracts.hub.proxy,
       deployerWallet
-    ).setUsageAddress(contract.address);
-  } else if (chainContracts.usage.isUpgreadable && !chainContracts.usage.impl) {
+    ).setKeeperAddress(contract.address);
+  } else if (
+    chainContracts.keeper.isUpgreadable &&
+    !chainContracts.keeper.impl
+  ) {
     await upgradeProxyWithLogs(
       chain,
-      chainContracts.usage.name,
-      chainContracts.usage.proxy,
-      new Usage__factory(deployerWallet)
+      chainContracts.keeper.name,
+      chainContracts.keeper.proxy,
+      new Keeper__factory(deployerWallet)
     );
   }
 

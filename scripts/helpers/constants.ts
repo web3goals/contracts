@@ -12,7 +12,7 @@ export const deployedContracts: {
   [key: string]: {
     hub: DeployedContract;
     goal: DeployedContract;
-    usage: DeployedContract;
+    keeper: DeployedContract;
     profile: DeployedContract;
     verifiers: Array<{
       verificationRequirement: "ANY_PROOF" | "GITHUB_ACTIVITY";
@@ -39,8 +39,8 @@ export const deployedContracts: {
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
       impl: "0x73Ba60093e1b7208831FbA9160aFA4A15E773686",
     },
-    usage: {
-      name: "Usage",
+    keeper: {
+      name: "Keeper",
       version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
@@ -99,8 +99,8 @@ export const deployedContracts: {
       proxy: "0x1F2c31D5034F27A4352Bc6ca0fc72cdC32809808",
       impl: "0x1F2c31D5034F27A4352Bc6ca0fc72cdC32809808",
     },
-    usage: {
-      name: "Usage",
+    keeper: {
+      name: "Keeper",
       version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
@@ -146,8 +146,8 @@ export const deployedContracts: {
       proxy: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
       impl: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
     },
-    usage: {
-      name: "Usage",
+    keeper: {
+      name: "Keeper",
       version: "0.1",
       isUpgreadable: false,
       isInitializable: true,

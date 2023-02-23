@@ -9,8 +9,6 @@ import {
   Hub__factory,
   Profile,
   Profile__factory,
-  Usage,
-  Usage__factory,
 } from "../typechain-types";
 import {
   getEpochSeconds,
@@ -19,6 +17,8 @@ import {
 } from "./helpers/utils";
 import { expect } from "chai";
 import { SECONDS_PER_DAY } from "./helpers/constants";
+import { Keeper } from "../typechain-types/contracts";
+import { Keeper__factory } from "../typechain-types/factories/contracts";
 
 export const goalContractParams = {
   usageFeePercent: 10,
@@ -69,7 +69,7 @@ export let userThreeAddress: string;
 export let hubContract: Hub;
 export let anyProofVerifier: AnyProofVerifier;
 export let goalContract: Goal;
-export let usageContract: Usage;
+export let keeperContract: Keeper;
 export let profileContract: Profile;
 
 export function makeSuiteCleanRoom(name: string, tests: () => void) {
@@ -120,9 +120,9 @@ before(async function () {
     goalContractParams.usageFeePercent
   );
 
-  // Deploy usage contract
-  usageContract = await new Usage__factory(deployer).deploy();
-  await usageContract.initialize();
+  // Deploy keeper contract
+  keeperContract = await new Keeper__factory(deployer).deploy();
+  await keeperContract.initialize();
 
   // Deploy profile contract
   profileContract = await new Profile__factory(deployer).deploy();
@@ -139,7 +139,7 @@ before(async function () {
     hubContract.setGoalAddress(goalContract.address)
   ).to.be.not.reverted;
   await expect(
-    hubContract.setUsageAddress(usageContract.address)
+    hubContract.setKeeperAddress(keeperContract.address)
   ).to.be.not.reverted;
   await expect(
     hubContract.setProfileAddress(profileContract.address)

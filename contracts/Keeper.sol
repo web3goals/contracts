@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /**
  * Contract to receive usage fee from the goal contract.
  */
-contract Usage is OwnableUpgradeable {
+contract Keeper is OwnableUpgradeable {
     event Received(address sender, uint value);
 
     function initialize() public initializer {

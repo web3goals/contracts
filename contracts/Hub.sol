@@ -10,13 +10,13 @@ import "./libraries/Errors.sol";
  */
 contract Hub is IHub, OwnableUpgradeable {
     address private _goalAddress;
-    address private _usageAddress;
+    address private _keeperAddress;
     address private _profileAddress;
     mapping(string => address) _verifierAddresses; // Key is a goal verification requirement
 
     function initialize(
         address goalAddress,
-        address usageAddress,
+        address keeperAddress,
         address profileAddress,
         string[] memory verifierVerificationRequirement,
         address[] memory verifierAddresses
@@ -29,7 +29,7 @@ contract Hub is IHub, OwnableUpgradeable {
         // Init
         __Ownable_init();
         _goalAddress = goalAddress;
-        _usageAddress = usageAddress;
+        _keeperAddress = keeperAddress;
         _profileAddress = profileAddress;
     }
 
@@ -41,12 +41,12 @@ contract Hub is IHub, OwnableUpgradeable {
         _goalAddress = goalAddress;
     }
 
-    function getUsageAddress() public view returns (address) {
-        return _usageAddress;
+    function getKeeperAddress() public view returns (address) {
+        return _keeperAddress;
     }
 
-    function setUsageAddress(address usageAddress) public onlyOwner {
-        _usageAddress = usageAddress;
+    function setKeeperAddress(address keeperAddress) public onlyOwner {
+        _keeperAddress = keeperAddress;
     }
 
     function getProfileAddress() public view returns (address) {

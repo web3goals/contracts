@@ -183,10 +183,6 @@ export const contractsData: {
     goalContract: {
       usagePercent: number;
     };
-    epnsContract?: {
-      address: string;
-      channelAddress: string;
-    };
     gitHubActivityVerifierContract?: {
       chainlinkTokenAddress: string;
       chainlinkOracleAddress: string;
@@ -197,10 +193,6 @@ export const contractsData: {
   mumbai: {
     goalContract: {
       usagePercent: 10,
-    },
-    epnsContract: {
-      address: "0xb3971bcef2d791bc4027bbfedfb47319a4aaaaaa",
-      channelAddress: "0x4306d7a79265d2cb85db0c5a55ea5f4f6f73c4b1",
     },
     gitHubActivityVerifierContract: {
       chainlinkTokenAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",

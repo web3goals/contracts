@@ -31,8 +31,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     event ClosedAsFailed(uint256 indexed tokenId);
 
     address private _hubAddress;
-    address private _epnsCommContractAddress; // TODO: Move to hub contract
-    address private _epnsChannelAddress; // TODO: Move to hub contract
     uint private _usageFeePercent;
     Counters.Counter private _counter;
     mapping(uint256 => DataTypes.GoalParams) private _params;
@@ -127,36 +125,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         );
         _watchers[tokenId].push(tokenWatcher);
         emit WatcherSet(tokenId, tokenWatcher.accountAddress, tokenWatcher);
-        // Send notification to goal author
-        if (
-            _epnsCommContractAddress != address(0) &&
-            _epnsChannelAddress != address(0)
-        ) {
-            // TODO: Move notification texts to variables
-            // TODO: Move notification code to internal function
-            IPUSHCommInterface(_epnsCommContractAddress).sendNotification(
-                _epnsChannelAddress, // from channel - recommended to set channel via dApp and put it's value -> then once contract is deployed, go back and add the contract address as delegate for your channel
-                _params[tokenId].authorAddress, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
-                bytes(
-                    string(
-                        // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
-                        abi.encodePacked(
-                            "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
-                            "+", // segregator
-                            "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
-                            "+", // segregator
-                            "New watcher is added", // this is notificaiton title
-                            "+", // segregator
-                            string.concat(
-                                "Open the goal #",
-                                Strings.toString(tokenId),
-                                " to accept it"
-                            ) // notification body
-                        )
-                    )
-                )
-            );
-        }
     }
 
     function acceptWatcher(uint256 tokenId, address watcherAddress) public {
@@ -300,26 +268,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
 
     function setHubAddress(address hubAddress) public onlyOwner {
         _hubAddress = hubAddress;
-    }
-
-    function getEpnsCommContractAddress() public view returns (address) {
-        return _epnsCommContractAddress;
-    }
-
-    function setEpnsCommContractAddress(
-        address epnsCommContractAddress
-    ) public onlyOwner {
-        _epnsCommContractAddress = epnsCommContractAddress;
-    }
-
-    function getEpnsChannelAddress() public view returns (address) {
-        return _epnsChannelAddress;
-    }
-
-    function setEpnsChannelAddress(
-        address epnsChannelAddress
-    ) public onlyOwner {
-        _epnsChannelAddress = epnsChannelAddress;
     }
 
     function getUsageFeePercent() public view returns (uint) {

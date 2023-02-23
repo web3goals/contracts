@@ -133,20 +133,6 @@ async function main() {
       isInitializeRequired: chainContracts.goal.isInitializable,
     });
     chainContracts.goal.proxy = contract.address;
-    if (chainContractsData.epnsContract) {
-      console.log("⚡ Set epns contract and channel addresses");
-      console.log(
-        "🔓 Don't forget to add this contract to epns channel delegates"
-      );
-      await Goal__factory.connect(
-        chainContracts.goal.proxy,
-        deployerWallet
-      ).setEpnsCommContractAddress(chainContractsData.epnsContract.address);
-      await Goal__factory.connect(
-        chainContracts.goal.proxy,
-        deployerWallet
-      ).setEpnsChannelAddress(chainContractsData.epnsContract.channelAddress);
-    }
     console.log("⚡ Send contract address to hub");
     await Hub__factory.connect(
       chainContracts.hub.proxy,

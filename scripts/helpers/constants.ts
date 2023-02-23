@@ -15,7 +15,7 @@ export const deployedContracts: {
     keeper: DeployedContract;
     profile: DeployedContract;
     verifiers: Array<{
-      verificationRequirement: "ANY_PROOF" | "GITHUB_ACTIVITY";
+      verificationRequirement: "ANY_PROOF";
       contract: DeployedContract;
     }>;
   };
@@ -67,17 +67,6 @@ export const deployedContracts: {
           isInitializable: false,
           proxy: "0xb03f6ca9A4565b6B11AF059883ACCA10FBD17462",
           impl: "0xb03f6ca9A4565b6B11AF059883ACCA10FBD17462",
-        },
-      },
-      {
-        verificationRequirement: "GITHUB_ACTIVITY",
-        contract: {
-          name: "GitHubActivityVerifier",
-          version: "0.1",
-          isUpgreadable: false,
-          isInitializable: false,
-          proxy: "0xDaf6a0FA0a70307B43A499BDC7d32F7A6f6fF234",
-          impl: "0xDaf6a0FA0a70307B43A499BDC7d32F7A6f6fF234",
         },
       },
     ],
@@ -183,21 +172,11 @@ export const contractsData: {
     goalContract: {
       usagePercent: number;
     };
-    gitHubActivityVerifierContract?: {
-      chainlinkTokenAddress: string;
-      chainlinkOracleAddress: string;
-      chainlinkJobId: string;
-    };
   };
 } = {
   mumbai: {
     goalContract: {
       usagePercent: 10,
-    },
-    gitHubActivityVerifierContract: {
-      chainlinkTokenAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-      chainlinkOracleAddress: "0x40193c8518BB267228Fc409a613bDbD8eC5a97b3",
-      chainlinkJobId: "c1c5e92880894eb6b27d3cae19670aa3",
     },
   },
   hyperspace: { goalContract: { usagePercent: 10 } },

@@ -9,7 +9,7 @@ import "../interfaces/IGoal.sol";
 import "../libraries/Errors.sol";
 
 /**
- * Contract to verify a goal by github activity.
+ * Contract to verify a goal by github activity using chainlink oracle.
  */
 contract GitHubActivityVerifier is Verifier, ChainlinkClient {
     using Chainlink for Chainlink.Request;

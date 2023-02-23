@@ -1,7 +1,6 @@
 import hre, { ethers } from "hardhat";
 import {
   AnyProofVerifier__factory,
-  GitHubActivityVerifier__factory,
   Goal__factory,
   Hub__factory,
   Keeper__factory,
@@ -86,26 +85,6 @@ async function main() {
         contractName: verifier.contract.name,
         contractFactory: new AnyProofVerifier__factory(deployerWallet),
         contractConstructorArgs: [chainContracts.hub.proxy],
-        isProxyRequired: verifier.contract.isUpgreadable,
-        isInitializeRequired: verifier.contract.isInitializable,
-      });
-    }
-    if (
-      verifier.verificationRequirement === "GITHUB_ACTIVITY" &&
-      chainContractsData.gitHubActivityVerifierContract
-    ) {
-      contract = await deployWithLogs({
-        chainName: chain,
-        contractName: verifier.contract.name,
-        contractFactory: new GitHubActivityVerifier__factory(deployerWallet),
-        contractConstructorArgs: [
-          chainContracts.hub.proxy,
-          chainContractsData.gitHubActivityVerifierContract
-            .chainlinkTokenAddress,
-          chainContractsData.gitHubActivityVerifierContract
-            .chainlinkOracleAddress,
-          chainContractsData.gitHubActivityVerifierContract.chainlinkJobId,
-        ],
         isProxyRequired: verifier.contract.isUpgreadable,
         isInitializeRequired: verifier.contract.isInitializable,
       });

@@ -43,7 +43,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address hubAddress,
         uint usageFeePercent
     ) public initializer {
-        __ERC721_init("Web3 Goals Goal", "W3GG");
+        __ERC721_init("Web3 Goals", "W3G");
         __Ownable_init();
         __Pausable_init();
         _hubAddress = hubAddress;

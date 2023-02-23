@@ -17,7 +17,7 @@ contract Bio is ERC721URIStorageUpgradeable {
     mapping(address => uint256) private _owners;
 
     function initialize() public initializer {
-        __ERC721_init("Web3 Goals Bio", "W3GB");
+        __ERC721_init("Web3 Goals Profiles", "W3GP");
     }
 
     /**

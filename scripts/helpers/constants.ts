@@ -1,5 +1,6 @@
 interface DeployedContract {
   name: string;
+  version: string; // Contracts version specified in package.json
   isUpgreadable: boolean;
   isInitializable: boolean;
   proxy?: string; // Or "impl" if contract deployed without proxy
@@ -22,6 +23,7 @@ export const deployedContracts: {
   mumbai: {
     hub: {
       name: "Hub",
+      version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
       proxy: "0x0d00Be3E0Fe16cD263b63cbBa3e88cf372317683",
@@ -30,6 +32,7 @@ export const deployedContracts: {
     },
     goal: {
       name: "Goal",
+      version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
       proxy: "0x226bEd02252BAB7b161a3762614d8e3Ec5012862",
@@ -38,6 +41,7 @@ export const deployedContracts: {
     },
     usage: {
       name: "Usage",
+      version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
       proxy: "0xc49A17BBA8d6cBD12fB500190603f235575B7d36",
@@ -46,6 +50,7 @@ export const deployedContracts: {
     },
     bio: {
       name: "Bio",
+      version: "0.1",
       isUpgreadable: true,
       isInitializable: true,
       proxy: "0xBfd1b773C4Af9C430883EDC9e70D4b4a4BF8E4d2",
@@ -57,6 +62,7 @@ export const deployedContracts: {
         verificationRequirement: "ANY_PROOF",
         contract: {
           name: "AnyProofVerifier",
+          version: "0.1",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0xb03f6ca9A4565b6B11AF059883ACCA10FBD17462",
@@ -67,6 +73,7 @@ export const deployedContracts: {
         verificationRequirement: "GITHUB_ACTIVITY",
         contract: {
           name: "GitHubActivityVerifier",
+          version: "0.1",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0xDaf6a0FA0a70307B43A499BDC7d32F7A6f6fF234",
@@ -78,6 +85,7 @@ export const deployedContracts: {
   hyperspace: {
     hub: {
       name: "Hub",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0xFB22c49674E4482C22D4499392a8e2f760D84f8d",
@@ -85,6 +93,7 @@ export const deployedContracts: {
     },
     goal: {
       name: "Goal",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0x1F2c31D5034F27A4352Bc6ca0fc72cdC32809808",
@@ -92,6 +101,7 @@ export const deployedContracts: {
     },
     usage: {
       name: "Usage",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0x9b18515b74eF6115A673c6D01C454D8F72f84177",
@@ -99,6 +109,7 @@ export const deployedContracts: {
     },
     bio: {
       name: "Bio",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0x2823Cf9c96deccE8DF6a7b0e4513fB5aFEC58B7a",
@@ -109,6 +120,7 @@ export const deployedContracts: {
         verificationRequirement: "ANY_PROOF",
         contract: {
           name: "AnyProofVerifier",
+          version: "0.1",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0x7A4ba8c3eA0524D4b1240d4eEbdDa3e2bfE4c87B",
@@ -120,6 +132,7 @@ export const deployedContracts: {
   mantleTestnet: {
     hub: {
       name: "Hub",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
@@ -127,6 +140,7 @@ export const deployedContracts: {
     },
     goal: {
       name: "Goal",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
@@ -134,6 +148,7 @@ export const deployedContracts: {
     },
     usage: {
       name: "Usage",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
@@ -141,6 +156,7 @@ export const deployedContracts: {
     },
     bio: {
       name: "Bio",
+      version: "0.1",
       isUpgreadable: false,
       isInitializable: true,
       proxy: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
@@ -151,6 +167,7 @@ export const deployedContracts: {
         verificationRequirement: "ANY_PROOF",
         contract: {
           name: "AnyProofVerifier",
+          version: "0.1",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0xC3d9DcfD747795c7F6590B51b44478a0EE7d02F1",

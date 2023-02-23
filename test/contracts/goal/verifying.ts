@@ -13,7 +13,7 @@ makeSuiteCleanRoom("Goal Verifying", function () {
       goalContract
         .connect(userOne)
         .set(
-          goalParams.one.uri,
+          goalParams.one.description,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
           goalParams.one.verificationRequirement,

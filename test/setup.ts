@@ -34,7 +34,7 @@ export const goalVerificationDataKeys = {
 
 export const goalParams = {
   one: {
-    uri: "ipfs://...",
+    description: "Train every week for 3 months",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
     verificationRequirement: goalVerificationRequirements.anyProof,

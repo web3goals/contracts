@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 library DataTypes {
     struct GoalParams {
         uint createdTimestamp;
+        string description;
         address authorAddress;
         uint authorStake;
         uint deadlineTimestamp;

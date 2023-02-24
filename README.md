@@ -12,8 +12,6 @@
 
 ## Links
 
-- Debugging with hardhat - https://hardhat.org/tutorial/debugging-with-hardhat-network
-
-## Example of OpenSea token link ot Testnet
-
-- https://testnets.opensea.io/assets/mumbai/0xdcf8bb4d8848440d421eb8b29079833944049208/1
+- Debugging with Hardhat - https://hardhat.org/tutorial/debugging-with-hardhat-network
+- OpenSea testnet - https://testnets.opensea.io/assets/mumbai/0xdcf8bb4d8848440d421eb8b29079833944049208/1
+- Rarible testnet - https://testnet.rarible.com/token/polygon/0xdcf8bb4d8848440d421eb8b29079833944049208:1?tab=properties

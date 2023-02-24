@@ -42,17 +42,19 @@ export const goalParams = {
     verificationDataValues: [],
     additionalVerificationDataKeys: [goalVerificationDataKeys.anyUri],
     additionalVerificationDataValues: ["ipfs://..."],
+    stakeForKeeper: BigNumber.from("5000000000000000"),
+    stakeForWatchers: BigNumber.from("45000000000000000"),
   },
 };
 
 export const goalWatcherExtraDataUris = {
-  one: "ipfs://one",
-  two: "ipfs://two",
+  one: "ipfs://abc",
+  two: "ipfs://def",
 };
 
 export const profileUris = {
-  one: "ipfs://one",
-  two: "ipfs://two",
+  one: "ipfs://abc",
+  two: "ipfs://def",
 };
 
 export let accounts: Array<Signer>;

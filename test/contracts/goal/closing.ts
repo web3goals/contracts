@@ -7,6 +7,7 @@ import {
   goalContract,
   goalParams,
   goalWatcherExtraDataUris,
+  keeperContract,
   makeSuiteCleanRoom,
   userOne,
   userThree,
@@ -85,17 +86,14 @@ makeSuiteCleanRoom("Goal Closing", function () {
     // Close goal
     await expect(
       goalContract.connect(userOne).close(setGoalId)
-    ).to.changeEtherBalances(
-      [userOne, goalContract.address],
-      [ethers.constants.Zero, ethers.constants.Zero]
-    );
+    ).to.changeEtherBalances([userOne], [ethers.constants.Zero]);
     // Check goal params
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
   });
 
-  it("Accepted goal watcher should be able to close a goal after deadline as failed and receive a part of stake", async function () {
+  it("Accepted goal watcher should be able to close a goal after deadline and stake should be send to keeper and accepted watchers", async function () {
     // Set goal by user onw
     await expect(
       goalContract
@@ -139,10 +137,11 @@ makeSuiteCleanRoom("Goal Closing", function () {
     await expect(
       goalContract.connect(userTwo).close(setGoalId)
     ).to.changeEtherBalances(
-      [userTwo, userThree, goalContract.address],
+      [userTwo, userThree, keeperContract.address, goalContract.address],
       [
-        goalParams.one.stake.div(BigNumber.from("2")),
-        goalParams.one.stake.div(BigNumber.from("2")),
+        goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
+        goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
+        goalParams.one.stakeForKeeper,
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
       ]
     );

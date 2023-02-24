@@ -35,6 +35,8 @@ library Errors {
         "Watcher is already accepted";
     string internal constant FAIL_TO_RETURN_AUTHOR_STAKE =
         "Fail to return author stake";
+    string internal constant FAIL_TO_SEND_PART_OF_STAKE_TO_KEEPER =
+        "Fail send a part of stake to keeper";
     string internal constant FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER =
         "Fail send a part of stake to watcher";
 

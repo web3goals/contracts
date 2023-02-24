@@ -226,6 +226,16 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             // Emit events
             emit ParamsSet(tokenId, _params[tokenId]);
             emit ClosedAsFailed(tokenId);
+            // Define stakes
+            uint stakeForKeeper = (_params[tokenId].authorStake *
+                _usageFeePercent) / 100;
+            uint stakeForWatchers = _params[tokenId].authorStake -
+                stakeForKeeper;
+            // Send stake to keeper
+            (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
+                value: stakeForKeeper
+            }("");
+            require(sentToKepper, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_KEEPER);
             // Define number of accepted watchers
             uint acceptedWatchersNumber = 0;
             for (uint i = 0; i < _watchers[tokenId].length; i++) {
@@ -234,17 +244,17 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                 }
             }
             // Send stake to accepted watchers
-            if (acceptedWatchersNumber == 0) {
-                return;
-            }
-            uint watcherStakePart = _params[tokenId].authorStake /
-                acceptedWatchersNumber;
             for (uint i = 0; i < _watchers[tokenId].length; i++) {
                 if (_watchers[tokenId][i].isAccepted) {
-                    (bool sent, ) = _watchers[tokenId][i].accountAddress.call{
-                        value: watcherStakePart
-                    }("");
-                    require(sent, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER);
+                    (bool sentToWatcher, ) = _watchers[tokenId][i]
+                        .accountAddress
+                        .call{value: stakeForWatchers / acceptedWatchersNumber}(
+                        ""
+                    );
+                    require(
+                        sentToWatcher,
+                        Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER
+                    );
                 }
             }
         }

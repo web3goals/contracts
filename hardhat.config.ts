@@ -34,11 +34,6 @@ const config: HardhatUserConfig = {
       url: process.env.RPC_URL_HYPERSPACE || "",
       accounts: accounts,
     },
-    mantleTestnet: {
-      chainId: 5001,
-      url: process.env.RPC_URL_MANTLE_TESTNET || "",
-      accounts: accounts,
-    },
   },
   etherscan: {
     apiKey: {

@@ -118,53 +118,6 @@ export const deployedContracts: {
       },
     ],
   },
-  mantleTestnet: {
-    hub: {
-      name: "Hub",
-      version: "0.1",
-      isUpgreadable: false,
-      isInitializable: true,
-      proxy: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
-      impl: "0x02e1A2a943E6Ce63a89d40EFAE63bf6AcDFEc268",
-    },
-    goal: {
-      name: "Goal",
-      version: "0.1",
-      isUpgreadable: false,
-      isInitializable: true,
-      proxy: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
-      impl: "0xCC282efAdaE8f2dFa322c61940AA1E8c11628d10",
-    },
-    keeper: {
-      name: "Keeper",
-      version: "0.1",
-      isUpgreadable: false,
-      isInitializable: true,
-      proxy: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
-      impl: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
-    },
-    profile: {
-      name: "Profile",
-      version: "0.1",
-      isUpgreadable: false,
-      isInitializable: true,
-      proxy: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
-      impl: "0xD9fEAbe16BAb684B5537eb6cbB43C8A4e6a90F47",
-    },
-    verifiers: [
-      {
-        verificationRequirement: "ANY_PROOF",
-        contract: {
-          name: "AnyProofVerifier",
-          version: "0.1",
-          isUpgreadable: false,
-          isInitializable: false,
-          proxy: "0xC3d9DcfD747795c7F6590B51b44478a0EE7d02F1",
-          impl: "0xC3d9DcfD747795c7F6590B51b44478a0EE7d02F1",
-        },
-      },
-    ],
-  },
 };
 
 export const contractsData: {
@@ -180,5 +133,4 @@ export const contractsData: {
     },
   },
   hyperspace: { goalContract: { usagePercent: 10 } },
-  mantleTestnet: { goalContract: { usagePercent: 10 } },
 };

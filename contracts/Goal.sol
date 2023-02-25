@@ -58,20 +58,14 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     ) public payable returns (uint256) {
         // Base checks
         _requireNotPaused();
-        require(
-            msg.value == stake,
-            Errors.STAKE_MUST_BE_EQUAL_TO_MESSAGE_VALUE
-        );
-        require(stake > 0, Errors.STAKE_MUST_BE_GREATER_THAN_ZERO);
-        require(
-            deadlineTimestamp > block.timestamp + Constants.SECONDS_PER_DAY,
-            Errors.MUST_BE_MORE_THAN_24_HOURS_BEFORE_DEADLINE_TIMESTAMP
-        );
-        require(
-            IHub(_hubAddress).getVerifierAddress(verificationRequirement) !=
-                address(0),
-            Errors.NOT_FOUND_VERIFIER_FOR_GOAL_VERIFICATION_REQUIREMENT
-        );
+        if (msg.value != stake) revert Errors.MessageValueMismatch();
+        if (stake <= 0) revert Errors.StakeInvalid();
+        if (deadlineTimestamp < block.timestamp + Constants.SECONDS_PER_DAY)
+            revert Errors.DeadlineMustBeAtLeast24HoursLater();
+        if (
+            IHub(_hubAddress).getVerifierAddress(verificationRequirement) ==
+            address(0)
+        ) revert Errors.VerifierNotFound();
         // Update counter
         _counter.increment();
         // Mint token
@@ -103,19 +97,15 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     function watch(uint256 tokenId, string memory extraDataURI) public {
         // Base Checks
         _requireNotPaused();
-        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
-        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
-        require(
-            _params[tokenId].authorAddress != msg.sender,
-            Errors.GOAL_AUTHOR_CAN_NOT_BE_A_WATCHER
-        );
-        bool isSenderWatcher = false;
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (_params[tokenId].authorAddress == msg.sender)
+            revert Errors.AuthorCannotBeWatcher();
         for (uint i = 0; i < _watchers[tokenId].length; i++) {
             if (_watchers[tokenId][i].accountAddress == msg.sender) {
-                isSenderWatcher = true;
+                revert Errors.AlreadyWatcher();
             }
         }
-        require(!isSenderWatcher, Errors.SENDER_IS_ALREADY_WATCHER);
         // Add watcher
         DataTypes.GoalWatcher memory tokenWatcher = DataTypes.GoalWatcher(
             block.timestamp,
@@ -130,12 +120,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     function acceptWatcher(uint256 tokenId, address watcherAddress) public {
         // Base checks
         _requireNotPaused();
-        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
-        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
-        require(
-            _params[tokenId].authorAddress == msg.sender,
-            Errors.SENDER_IS_NOT_GOAL_AUTHOR
-        );
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (_params[tokenId].authorAddress != msg.sender)
+            revert Errors.NotAuthor();
         // Check watcher
         uint watcherIndex = 2 ^ (256 - 1);
         for (uint i = 0; i < _watchers[tokenId].length; i++) {
@@ -143,11 +131,11 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                 watcherIndex = i;
             }
         }
-        require(watcherIndex != 2 ^ (256 - 1), Errors.WATCHER_IS_NOT_FOUND);
+        if (watcherIndex == 2 ^ (256 - 1)) revert Errors.WatcherNotFound();
         DataTypes.GoalWatcher storage watcher = _watchers[tokenId][
             watcherIndex
         ];
-        require(!watcher.isAccepted, Errors.WATCHER_IS_ALREADY_ACCEPTED);
+        if (watcher.isAccepted) revert Errors.AlreadyAccepted();
         // Update watcher
         watcher.isAccepted = true;
         // Emit events
@@ -165,12 +153,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     ) public {
         // Base Checks
         _requireNotPaused();
-        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
-        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
-        require(
-            _params[tokenId].authorAddress == msg.sender,
-            Errors.SENDER_IS_NOT_GOAL_AUTHOR
-        );
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (_params[tokenId].authorAddress != msg.sender)
+            revert Errors.NotAuthor();
         // Add verification data
         _addVerificationData(
             tokenId,
@@ -193,21 +179,19 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     function close(uint256 tokenId) public {
         // Base checks
         _requireNotPaused();
-        require(_exists(tokenId), Errors.TOKEN_DOES_NOT_EXIST);
-        require(!_params[tokenId].isClosed, Errors.GOAL_IS_CLOSED);
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         // Try close as achieved by goal author if deadline has not passed
         if (_params[tokenId].deadlineTimestamp > block.timestamp) {
-            require(
-                _params[tokenId].authorAddress == msg.sender,
-                Errors.SENDER_IS_NOT_GOAL_AUTHOR
-            );
+            // Check author
+            if (_params[tokenId].authorAddress != msg.sender)
+                revert Errors.NotAuthor();
+            // Check verification status
             (bool isVerificationStatusAchieved, ) = IVerifier(
                 _getVerifierAddress(tokenId)
             ).getVerificationStatus(tokenId);
-            require(
-                isVerificationStatusAchieved,
-                Errors.GOAL_VERIFICATION_STATUS_IS_NOT_ACHIEVED
-            );
+            if (!isVerificationStatusAchieved) revert Errors.NotAchieved();
+            // Update token
             _params[tokenId].isClosed = true;
             _params[tokenId].isAchieved = true;
             // Emit events
@@ -217,7 +201,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             (bool sent, ) = _params[tokenId].authorAddress.call{
                 value: _params[tokenId].authorStake
             }("");
-            require(sent, Errors.FAIL_TO_RETURN_AUTHOR_STAKE);
+            if (!sent) revert Errors.SendingStakeToAuthorFailed();
         }
         // Close as failed if deadline has passed
         else {
@@ -235,7 +219,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
                 value: stakeForKeeper
             }("");
-            require(sentToKepper, Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_KEEPER);
+            if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
             // Define number of accepted watchers
             uint acceptedWatchersNumber = 0;
             for (uint i = 0; i < _watchers[tokenId].length; i++) {
@@ -251,10 +235,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                         .call{value: stakeForWatchers / acceptedWatchersNumber}(
                         ""
                     );
-                    require(
-                        sentToWatcher,
-                        Errors.FAIL_TO_SEND_PART_OF_STAKE_TO_WATCHER
-                    );
+                    if (!sentToWatcher)
+                        revert Errors.SendingStakeToWatcherFailed();
                 }
             }
         }
@@ -367,10 +349,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address verifierAddress = IHub(_hubAddress).getVerifierAddress(
             _params[tokenId].verificationRequirement
         );
-        require(
-            verifierAddress != address(0),
-            Errors.NOT_FOUND_VERIFIER_FOR_GOAL_VERIFICATION_REQUIREMENT
-        );
+        if (verifierAddress == address(0)) revert Errors.VerifierNotFound();
         return verifierAddress;
     }
 
@@ -379,10 +358,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         string[] memory verificationDataKeys,
         string[] memory verificationDataValues
     ) internal {
-        require(
-            verificationDataKeys.length == verificationDataValues.length,
-            Errors.ARRAYS_MUST_HAVE_THE_SAME_LENGTH
-        );
+        if (verificationDataKeys.length != verificationDataValues.length)
+            revert Errors.ArraysLengthInvalid();
         for (uint i = 0; i < verificationDataKeys.length; i++) {
             _verificationData[tokenId][
                 verificationDataKeys[i]
@@ -401,6 +378,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     ) internal virtual override(ERC721Upgradeable) {
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
         // Disable transfers except minting
-        require(from == address(0), Errors.TOKEN_IS_NON_TRANSFERABLE);
+        if (from != address(0)) revert Errors.TokenNotTransferable();
     }
 }

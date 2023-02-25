@@ -40,10 +40,8 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
 
     function verify(uint256 goalTokenId) public override {
         // Check sender
-        require(
-            msg.sender == IHub(_hubAddress).getGoalAddress(),
-            Errors.SENDER_IS_NOT_GOAL_CONTRACT
-        );
+        if (msg.sender != IHub(_hubAddress).getGoalAddress())
+            revert Errors.NotGoalContract();
         // Check verification data
         IGoal goalContract = IGoal(IHub(_hubAddress).getGoalAddress());
         string memory gitHubUsername = goalContract.getVerificationData(
@@ -54,11 +52,10 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
             goalTokenId,
             _gitHubActivityDaysKey
         );
-        require(
-            !Strings.equal(gitHubUsername, "") ||
-                !Strings.equal(gitHubActivityDays, ""),
-            Errors.GOAL_DOES_NOT_HAVE_GITHUB_USERNAME_OR_ACTIVITY_DAYS
-        );
+        if (
+            Strings.equal(gitHubUsername, "") ||
+            Strings.equal(gitHubActivityDays, "")
+        ) revert Errors.GitHubUsernameOrActivityDaysNotExist();
         // Make chainlink request
         Chainlink.Request memory req = buildChainlinkRequest(
             _jobId,
@@ -100,9 +97,7 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
      */
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(
-            link.transfer(msg.sender, link.balanceOf(address(this))),
-            Errors.UNABLE_TO_TRANSFER
-        );
+        if (!link.transfer(msg.sender, link.balanceOf(address(this))))
+            revert Errors.UnableTransfer();
     }
 }

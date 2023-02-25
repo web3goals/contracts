@@ -21,12 +21,8 @@ contract Hub is IHub, OwnableUpgradeable {
         string[] memory verifierVerificationRequirement,
         address[] memory verifierAddresses
     ) public initializer {
-        // Base checks
-        require(
-            verifierVerificationRequirement.length == verifierAddresses.length,
-            Errors.ARRAYS_MUST_HAVE_THE_SAME_LENGTH
-        );
-        // Init
+        if (verifierVerificationRequirement.length != verifierAddresses.length)
+            revert Errors.ArraysLengthInvalid();
         __Ownable_init();
         _goalAddress = goalAddress;
         _keeperAddress = keeperAddress;

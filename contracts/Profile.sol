@@ -79,6 +79,6 @@ contract Profile is ERC721URIStorageUpgradeable {
     ) internal virtual override(ERC721Upgradeable) {
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
         // Disable transfers except minting
-        require(from == address(0), Errors.TOKEN_IS_NON_TRANSFERABLE);
+        if (from != address(0)) revert Errors.TokenNotTransferable();
     }
 }

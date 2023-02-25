@@ -18,21 +18,18 @@ contract AnyProofVerifier is Verifier {
 
     function verify(uint256 goalTokenId) public override {
         // Check sender
-        require(
-            msg.sender == IHub(_hubAddress).getGoalAddress(),
-            Errors.SENDER_IS_NOT_GOAL_CONTRACT
-        );
+        if (msg.sender != IHub(_hubAddress).getGoalAddress())
+            revert Errors.NotGoalContract();
         // Check verification data
         string memory anyUri = IGoal(IHub(_hubAddress).getGoalAddress())
             .getVerificationData(goalTokenId, _anyUriKey);
         string memory anyLivepeerPlaybackId = IGoal(
             IHub(_hubAddress).getGoalAddress()
         ).getVerificationData(goalTokenId, _anyLivepeerPlaybackIdKey);
-        require(
-            !Strings.equal(anyUri, "") ||
-                !Strings.equal(anyLivepeerPlaybackId, ""),
-            Errors.GOAL_DOES_NOT_HAVE_ANY_PROOF
-        );
+        if (
+            Strings.equal(anyUri, "") &&
+            Strings.equal(anyLivepeerPlaybackId, "")
+        ) revert Errors.AnyProofNotExists();
         // Update verification status
         _goalsVerifiedAsAchieved[goalTokenId] = true;
         _goalsVerifiedAsFailed[goalTokenId] = true;

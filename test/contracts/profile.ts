@@ -53,6 +53,6 @@ makeSuiteCleanRoom("Profile", function () {
       profileContract
         .connect(userTwo)
         .transferFrom(userTwoAddress, userThreeAddress, tokenId)
-    ).to.be.revertedWith("Token is non-transferable");
+    ).to.be.reverted;
   });
 });

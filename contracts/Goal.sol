@@ -226,16 +226,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             // Emit events
             emit ParamsSet(tokenId, _params[tokenId]);
             emit ClosedAsFailed(tokenId);
-            // Define stakes
-            uint stakeForKeeper = (_params[tokenId].authorStake *
-                _usageFeePercent) / 100;
-            uint stakeForWatchers = _params[tokenId].authorStake -
-                stakeForKeeper;
-            // Send stake to keeper
-            (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
-                value: stakeForKeeper
-            }("");
-            if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
             // Define number of accepted watchers
             uint acceptedWatchersNumber = 0;
             for (uint i = 0; i < _watchers[tokenId].length; i++) {
@@ -243,16 +233,36 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                     acceptedWatchersNumber++;
                 }
             }
-            // Send stake to accepted watchers
-            for (uint i = 0; i < _watchers[tokenId].length; i++) {
-                if (_watchers[tokenId][i].isAccepted) {
-                    (bool sentToWatcher, ) = _watchers[tokenId][i]
-                        .accountAddress
-                        .call{value: stakeForWatchers / acceptedWatchersNumber}(
-                        ""
-                    );
-                    if (!sentToWatcher)
-                        revert Errors.SendingStakeToWatcherFailed();
+            // If there are no accepted watchers, then send stake to keeper
+            if (acceptedWatchersNumber == 0) {
+                (bool sentToKepper, ) = IHub(_hubAddress)
+                    .getKeeperAddress()
+                    .call{value: _params[tokenId].authorStake}("");
+                if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
+            }
+            // If accepted watchers exist, then send part of stake to them and part to keeper
+            else {
+                // Define stakes
+                uint stakeForKeeper = (_params[tokenId].authorStake *
+                    _usageFeePercent) / 100;
+                uint stakeForWatchers = _params[tokenId].authorStake -
+                    stakeForKeeper;
+                // Send stake to keeper
+                (bool sentToKepper, ) = IHub(_hubAddress)
+                    .getKeeperAddress()
+                    .call{value: stakeForKeeper}("");
+                if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
+                // Send stake to watchers
+                for (uint i = 0; i < _watchers[tokenId].length; i++) {
+                    if (_watchers[tokenId][i].isAccepted) {
+                        (bool sentToWatcher, ) = _watchers[tokenId][i]
+                            .accountAddress
+                            .call{
+                            value: stakeForWatchers / acceptedWatchersNumber
+                        }("");
+                        if (!sentToWatcher)
+                            revert Errors.SendingStakeToWatcherFailed();
+                    }
                 }
             }
         }

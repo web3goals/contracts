@@ -62,7 +62,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(params.isAchieved).to.equal(true);
   });
 
-  it("Goal author should be able to close a goal after deadline as failed and not return stake", async function () {
+  it("Goal author should be able to close a goal after deadline as failed and stake should be send to keeper", async function () {
     // Set goal
     await expect(
       goalContract
@@ -86,7 +86,14 @@ makeSuiteCleanRoom("Goal Closing", function () {
     // Close goal
     await expect(
       goalContract.connect(userOne).close(setGoalId)
-    ).to.changeEtherBalances([userOne], [ethers.constants.Zero]);
+    ).to.changeEtherBalances(
+      [userOne, keeperContract.address, goalContract.address],
+      [
+        ethers.constants.Zero,
+        goalParams.one.stake,
+        goalParams.one.stake.mul(ethers.constants.NegativeOne),
+      ]
+    );
     // Check goal params
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);

@@ -197,74 +197,11 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Base checks
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
-        // Try close as achieved by goal author if deadline has not passed
+        // Close
         if (_params[tokenId].deadlineTimestamp > block.timestamp) {
-            // Check author and verification status
-            if (_params[tokenId].authorAddress != msg.sender)
-                revert Errors.NotAuthor();
-            (bool isVerificationStatusAchieved, ) = IVerifier(
-                _getVerifierAddress(tokenId)
-            ).getVerificationStatus(tokenId);
-            if (!isVerificationStatusAchieved) revert Errors.NotAchieved();
-            // Update token
-            _params[tokenId].isClosed = true;
-            _params[tokenId].isAchieved = true;
-            // Emit events
-            emit ParamsSet(tokenId, _params[tokenId]);
-            emit ClosedAsAchieved(tokenId);
-            // Return stake
-            (bool sent, ) = _params[tokenId].authorAddress.call{
-                value: _params[tokenId].authorStake
-            }("");
-            if (!sent) revert Errors.SendingStakeToAuthorFailed();
-        }
-        // Close as failed if deadline has passed
-        else {
-            // Update token
-            _params[tokenId].isClosed = true;
-            _params[tokenId].isAchieved = false;
-            // Emit events
-            emit ParamsSet(tokenId, _params[tokenId]);
-            emit ClosedAsFailed(tokenId);
-            // Define number of accepted watchers
-            uint acceptedWatchersNumber = 0;
-            for (uint i = 0; i < _watchers[tokenId].length; i++) {
-                if (_watchers[tokenId][i].isAccepted) {
-                    acceptedWatchersNumber++;
-                }
-            }
-            // If there are no accepted watchers, then send stake to keeper
-            if (acceptedWatchersNumber == 0) {
-                (bool sentToKepper, ) = IHub(_hubAddress)
-                    .getKeeperAddress()
-                    .call{value: _params[tokenId].authorStake}("");
-                if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
-            }
-            // If accepted watchers exist, then send part of stake to them and part to keeper
-            else {
-                // Define stakes
-                uint stakeForKeeper = (_params[tokenId].authorStake *
-                    _usageFeePercent) / 100;
-                uint stakeForWatchers = _params[tokenId].authorStake -
-                    stakeForKeeper;
-                // Send stake to keeper
-                (bool sentToKepper, ) = IHub(_hubAddress)
-                    .getKeeperAddress()
-                    .call{value: stakeForKeeper}("");
-                if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
-                // Send stake to watchers
-                for (uint i = 0; i < _watchers[tokenId].length; i++) {
-                    if (_watchers[tokenId][i].isAccepted) {
-                        (bool sentToWatcher, ) = _watchers[tokenId][i]
-                            .accountAddress
-                            .call{
-                            value: stakeForWatchers / acceptedWatchersNumber
-                        }("");
-                        if (!sentToWatcher)
-                            revert Errors.SendingStakeToWatcherFailed();
-                    }
-                }
-            }
+            _closeAsAchievedBeforeDeadline(tokenId);
+        } else {
+            _closeAsFailedAfterDeadline(tokenId);
         }
     }
 
@@ -391,6 +328,75 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _verificationData[tokenId][
                 verificationDataKeys[i]
             ] = verificationDataValues[i];
+        }
+    }
+
+    function _closeAsAchievedBeforeDeadline(uint256 tokenId) internal {
+        // Check author
+        if (_params[tokenId].authorAddress != msg.sender)
+            revert Errors.NotAuthor();
+        // Check verification status
+        (bool isVerificationStatusAchieved, ) = IVerifier(
+            _getVerifierAddress(tokenId)
+        ).getVerificationStatus(tokenId);
+        if (!isVerificationStatusAchieved) revert Errors.NotAchieved();
+        // Update token
+        _params[tokenId].isClosed = true;
+        _params[tokenId].isAchieved = true;
+        // Emit events
+        emit ParamsSet(tokenId, _params[tokenId]);
+        emit ClosedAsAchieved(tokenId);
+        // Return stake
+        (bool sent, ) = _params[tokenId].authorAddress.call{
+            value: _params[tokenId].authorStake
+        }("");
+        if (!sent) revert Errors.SendingStakeToAuthorFailed();
+    }
+
+    function _closeAsFailedAfterDeadline(uint256 tokenId) internal {
+        // Update token
+        _params[tokenId].isClosed = true;
+        _params[tokenId].isAchieved = false;
+        // Emit events
+        emit ParamsSet(tokenId, _params[tokenId]);
+        emit ClosedAsFailed(tokenId);
+        // Define number of accepted watchers
+        uint acceptedWatchersNumber = 0;
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].isAccepted) {
+                acceptedWatchersNumber++;
+            }
+        }
+        // If there are no accepted watchers, then send stake to keeper
+        if (acceptedWatchersNumber == 0) {
+            (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
+                value: _params[tokenId].authorStake
+            }("");
+            if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
+        }
+        // If accepted watchers exist, then send part of stake to them and part to keeper
+        else {
+            // Send stake to keeper
+            uint stakeForKeeper = (_params[tokenId].authorStake *
+                _usageFeePercent) / 100;
+            (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
+                value: stakeForKeeper
+            }("");
+            if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
+            // Send stake to watchers
+            uint stakeForWatchers = _params[tokenId].authorStake -
+                stakeForKeeper;
+            for (uint i = 0; i < _watchers[tokenId].length; i++) {
+                if (_watchers[tokenId][i].isAccepted) {
+                    (bool sentToWatcher, ) = _watchers[tokenId][i]
+                        .accountAddress
+                        .call{value: stakeForWatchers / acceptedWatchersNumber}(
+                        ""
+                    );
+                    if (!sentToWatcher)
+                        revert Errors.SendingStakeToWatcherFailed();
+                }
+            }
         }
     }
 

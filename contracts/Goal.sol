@@ -199,10 +199,9 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         // Try close as achieved by goal author if deadline has not passed
         if (_params[tokenId].deadlineTimestamp > block.timestamp) {
-            // Check author
+            // Check author and verification status
             if (_params[tokenId].authorAddress != msg.sender)
                 revert Errors.NotAuthor();
-            // Check verification status
             (bool isVerificationStatusAchieved, ) = IVerifier(
                 _getVerifierAddress(tokenId)
             ).getVerificationStatus(tokenId);
@@ -221,6 +220,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         }
         // Close as failed if deadline has passed
         else {
+            // Update token
             _params[tokenId].isClosed = true;
             _params[tokenId].isAchieved = false;
             // Emit events

@@ -48,6 +48,30 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         _usageFeePercent = usageFeePercent;
     }
 
+    /// ***************************
+    /// ***** OWNER FUNCTIONS *****
+    /// ***************************
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function setHubAddress(address hubAddress) public onlyOwner {
+        _hubAddress = hubAddress;
+    }
+
+    function setUsageFeePercent(uint usageFeePercent) public onlyOwner {
+        _usageFeePercent = usageFeePercent;
+    }
+
+    /// ****************************************
+    /// ***** AUTHOR AND WATCHER FUNCTIONS *****
+    /// ****************************************
+
     function set(
         string memory description,
         uint stake,
@@ -167,15 +191,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         IVerifier(_getVerifierAddress(tokenId)).verify(tokenId);
     }
 
-    function getVerificationStatus(
-        uint tokenId
-    ) public view returns (bool isAchieved, bool isFailed) {
-        return
-            IVerifier(_getVerifierAddress(tokenId)).getVerificationStatus(
-                tokenId
-            );
-    }
-
     function close(uint256 tokenId) public {
         // Base checks
         _requireNotPaused();
@@ -242,38 +257,41 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         }
     }
 
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    function unpause() public onlyOwner {
-        _unpause();
-    }
-
-    function getCurrentCounter() public view returns (uint) {
-        return _counter.current();
-    }
+    /// *********************************
+    /// ***** PUBLIC VIEW FUNCTIONS *****
+    /// *********************************
 
     function getHubAddress() public view returns (address) {
         return _hubAddress;
-    }
-
-    function setHubAddress(address hubAddress) public onlyOwner {
-        _hubAddress = hubAddress;
     }
 
     function getUsageFeePercent() public view returns (uint) {
         return _usageFeePercent;
     }
 
-    function setUsageFeePercent(uint usageFeePercent) public onlyOwner {
-        _usageFeePercent = usageFeePercent;
+    function getCurrentCounter() public view returns (uint) {
+        return _counter.current();
     }
 
     function getParams(
         uint256 tokenId
     ) public view returns (DataTypes.GoalParams memory) {
         return _params[tokenId];
+    }
+
+    function getWatchers(
+        uint256 tokenId
+    ) public view returns (DataTypes.GoalWatcher[] memory) {
+        return _watchers[tokenId];
+    }
+
+    function getVerificationStatus(
+        uint tokenId
+    ) public view returns (bool isAchieved, bool isFailed) {
+        return
+            IVerifier(_getVerifierAddress(tokenId)).getVerificationStatus(
+                tokenId
+            );
     }
 
     function getVerificationData(
@@ -292,12 +310,6 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             values[i] = (_verificationData[tokenId][keys[i]]);
         }
         return values;
-    }
-
-    function getWatchers(
-        uint256 tokenId
-    ) public view returns (DataTypes.GoalWatcher[] memory) {
-        return _watchers[tokenId];
     }
 
     // TODO: Move image value to changeable variables
@@ -342,6 +354,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                 )
             );
     }
+
+    /// ******************************
+    /// ***** INTERNAL FUNCTIONS *****
+    /// ******************************
 
     function _getVerifierAddress(
         uint256 tokenId

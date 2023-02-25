@@ -79,9 +79,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         string memory verificationRequirement,
         string[] memory verificationDataKeys,
         string[] memory verificationDataValues
-    ) public payable returns (uint256) {
+    ) public payable whenNotPaused returns (uint256) {
         // Base checks
-        _requireNotPaused();
         if (msg.value != stake) revert Errors.MessageValueMismatch();
         if (stake <= 0) revert Errors.StakeInvalid();
         if (deadlineTimestamp < block.timestamp + Constants.SECONDS_PER_DAY)
@@ -118,9 +117,11 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         return newTokenId;
     }
 
-    function watch(uint256 tokenId, string memory extraDataURI) public {
+    function watch(
+        uint256 tokenId,
+        string memory extraDataURI
+    ) public whenNotPaused {
         // Base Checks
-        _requireNotPaused();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress == msg.sender)
@@ -141,9 +142,11 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         emit WatcherSet(tokenId, tokenWatcher.accountAddress, tokenWatcher);
     }
 
-    function acceptWatcher(uint256 tokenId, address watcherAddress) public {
+    function acceptWatcher(
+        uint256 tokenId,
+        address watcherAddress
+    ) public whenNotPaused {
         // Base checks
-        _requireNotPaused();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress != msg.sender)
@@ -166,7 +169,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         emit WatcherSet(tokenId, watcher.accountAddress, watcher);
     }
 
-    function verify(uint tokenId) public {
+    function verify(uint tokenId) public whenNotPaused {
         addVerificationDataAndVerify(tokenId, new string[](0), new string[](0));
     }
 
@@ -174,9 +177,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         uint tokenId,
         string[] memory verificationDataKeys,
         string[] memory verificationDataValues
-    ) public {
+    ) public whenNotPaused {
         // Base Checks
-        _requireNotPaused();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress != msg.sender)
@@ -191,9 +193,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         IVerifier(_getVerifierAddress(tokenId)).verify(tokenId);
     }
 
-    function close(uint256 tokenId) public {
+    function close(uint256 tokenId) public whenNotPaused {
         // Base checks
-        _requireNotPaused();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         // Try close as achieved by goal author if deadline has not passed

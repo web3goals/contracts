@@ -20,13 +20,12 @@ import "./libraries/Constants.sol";
 contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     using Counters for Counters.Counter;
 
-    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams);
+    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams params);
     event WatcherSet(
         uint256 indexed tokenId,
         address indexed watcherAccountAddress,
         DataTypes.GoalWatcher watcher
     );
-    event URISet(uint256 indexed tokenId, string tokenURI);
     event ClosedAsAchieved(uint256 indexed tokenId);
     event ClosedAsFailed(uint256 indexed tokenId);
 
@@ -270,7 +269,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                     "data:application/json;base64,",
                     Base64.encode(
                         abi.encodePacked(
-                            '{"name":" Web3 Goal #',
+                            '{"name":"Web3 Goal #',
                             Strings.toString(tokenId),
                             '","image":"data:image/svg+xml;base64,',
                             Base64.encode(

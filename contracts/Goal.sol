@@ -26,6 +26,12 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address indexed watcherAccountAddress,
         DataTypes.GoalWatcher watcher
     );
+    event AddedVerificationData(
+        uint256 indexed tokenId,
+        string key,
+        string value
+    );
+    event SentToVerifier(uint256 indexed tokenId);
     event ClosedAsAchieved(uint256 indexed tokenId);
     event ClosedAsFailed(uint256 indexed tokenId);
 
@@ -190,6 +196,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         );
         // Verify
         IVerifier(_getVerifierAddress(tokenId)).verify(tokenId);
+        // Emit event
+        emit SentToVerifier(tokenId);
     }
 
     function close(uint256 tokenId) public whenNotPaused {
@@ -327,6 +335,11 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _verificationData[tokenId][
                 verificationDataKeys[i]
             ] = verificationDataValues[i];
+            emit AddedVerificationData(
+                tokenId,
+                verificationDataKeys[i],
+                verificationDataValues[i]
+            );
         }
     }
 

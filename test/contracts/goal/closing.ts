@@ -10,6 +10,7 @@ import {
   keeperContract,
   makeSuiteCleanRoom,
   userOne,
+  userOneAddress,
   userThree,
   userThreeAddress,
   userTwo,
@@ -60,6 +61,10 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
+    // Check account reputation
+    expect(
+      (await goalContract.getAccountReputation(userOneAddress)).achievedGoals
+    ).to.equal(1);
   });
 
   it("Goal author should be able to close a goal after deadline as failed and stake should be send to keeper", async function () {
@@ -98,6 +103,10 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
+    // Check account reputation
+    expect(
+      (await goalContract.getAccountReputation(userOneAddress)).failedGoals
+    ).to.equal(1);
   });
 
   it("Accepted goal watcher should be able to close a goal after deadline and stake should be send to keeper and accepted watchers", async function () {
@@ -156,5 +165,15 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(setGoalId);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
+    // Check accounts reputation
+    expect(
+      (await goalContract.getAccountReputation(userOneAddress)).failedGoals
+    ).to.equal(1);
+    expect(
+      (await goalContract.getAccountReputation(userTwoAddress)).motivatedGoals
+    ).to.equal(0);
+    expect(
+      (await goalContract.getAccountReputation(userThreeAddress)).motivatedGoals
+    ).to.equal(0);
   });
 });

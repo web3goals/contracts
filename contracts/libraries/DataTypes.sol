@@ -19,4 +19,10 @@ library DataTypes {
         bool isAccepted;
         string extraDataURI;
     }
+
+    struct AccountReputation {
+        uint achievedGoals;
+        uint failedGoals;
+        uint motivatedGoals;
+    }
 }

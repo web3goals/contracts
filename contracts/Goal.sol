@@ -26,6 +26,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address indexed watcherAccountAddress,
         DataTypes.GoalWatcher watcher
     );
+    event AccountReputationSet(
+        address indexed accountAddress,
+        DataTypes.AccountReputation accountReputation
+    );
     event AddedVerificationData(
         uint256 indexed tokenId,
         string key,
@@ -42,6 +46,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     mapping(uint256 => DataTypes.GoalParams) private _params;
     mapping(uint256 => mapping(string => string)) _verificationData;
     mapping(uint256 => DataTypes.GoalWatcher[]) private _watchers;
+    mapping(address => DataTypes.AccountReputation) private _accountReputations;
 
     function initialize(
         address hubAddress,
@@ -250,6 +255,12 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         return _watchers[tokenId];
     }
 
+    function getAccountReputation(
+        address accountAddress
+    ) public view returns (DataTypes.AccountReputation memory) {
+        return _accountReputations[accountAddress];
+    }
+
     function getVerificationStatus(
         uint tokenId
     ) public view returns (bool isAchieved, bool isFailed) {
@@ -360,9 +371,25 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = true;
-        // Emit events
         emit ParamsSet(tokenId, _params[tokenId]);
         emit ClosedAsAchieved(tokenId);
+        // Update reputation for creator
+        _accountReputations[_params[tokenId].authorAddress].achievedGoals++;
+        emit AccountReputationSet(
+            _params[tokenId].authorAddress,
+            _accountReputations[_params[tokenId].authorAddress]
+        );
+        // Update reputation for accepted watchers
+        for (uint i = 0; i < _watchers[tokenId].length; i++) {
+            if (_watchers[tokenId][i].isAccepted) {
+                _accountReputations[_watchers[tokenId][i].accountAddress]
+                    .motivatedGoals++;
+                emit AccountReputationSet(
+                    _watchers[tokenId][i].accountAddress,
+                    _accountReputations[_watchers[tokenId][i].accountAddress]
+                );
+            }
+        }
         // Return stake
         (bool sent, ) = _params[tokenId].authorAddress.call{
             value: _params[tokenId].authorStake
@@ -374,6 +401,12 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
+        // Update reputation for creator
+        _accountReputations[_params[tokenId].authorAddress].failedGoals++;
+        emit AccountReputationSet(
+            _params[tokenId].authorAddress,
+            _accountReputations[_params[tokenId].authorAddress]
+        );
         // Emit events
         emit ParamsSet(tokenId, _params[tokenId]);
         emit ClosedAsFailed(tokenId);

@@ -26,6 +26,6 @@ library Errors {
 
     // Verifier errors
     error NotGoalContract();
-    error ProofURINotExists();
+    error AnyProofURINotExists();
     error GitHubUsernameOrActivityDaysNotExist();
 }

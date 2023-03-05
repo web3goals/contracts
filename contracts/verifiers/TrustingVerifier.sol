@@ -10,8 +10,8 @@ import "../libraries/Errors.sol";
 /**
  * Contract that verify a goal with any existing proof uri as achieved.
  */
-contract AnyProofVerifier is Verifier {
-    string _proofURIKey = "PROOF_URI";
+contract TrustingVerifier is Verifier {
+    string _anyProofURIKey = "ANY_PROOF_URI";
 
     constructor(address hubAddress) Verifier(hubAddress) {}
 
@@ -21,8 +21,8 @@ contract AnyProofVerifier is Verifier {
             revert Errors.NotGoalContract();
         // Check verification data
         string memory proofURI = IGoal(IHub(_hubAddress).getGoalAddress())
-            .getVerificationData(goalTokenId, _proofURIKey);
-        if (Strings.equal(proofURI, "")) revert Errors.ProofURINotExists();
+            .getVerificationData(goalTokenId, _anyProofURIKey);
+        if (Strings.equal(proofURI, "")) revert Errors.AnyProofURINotExists();
         // Update verification status
         _goalsVerifiedAsAchieved[goalTokenId] = true;
     }

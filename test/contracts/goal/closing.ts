@@ -9,6 +9,8 @@ import {
   goalWatcherExtraDataUris,
   keeperContract,
   makeSuiteCleanRoom,
+  profileContract,
+  profileUris,
   userOne,
   userOneAddress,
   userThree,
@@ -18,6 +20,12 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Closing", function () {
+  beforeEach(async function () {
+    await profileContract.connect(userOne).setURI(profileUris.one);
+    await profileContract.connect(userTwo).setURI(profileUris.two);
+    await profileContract.connect(userThree).setURI(profileUris.three);
+  });
+
   it("Goal author should be able to close a goal after verification as achieved and return stake", async function () {
     // Set goal
     await expect(

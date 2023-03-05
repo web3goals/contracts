@@ -4,12 +4,20 @@ import {
   goalParams,
   goalWatcherExtraDataUris,
   makeSuiteCleanRoom,
+  profileContract,
+  profileUris,
   userOne,
   userThree,
   userTwo,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Watching", function () {
+  beforeEach(async function () {
+    await profileContract.connect(userOne).setURI(profileUris.one);
+    await profileContract.connect(userTwo).setURI(profileUris.two);
+    await profileContract.connect(userThree).setURI(profileUris.three);
+  });
+
   it("User should be able to watch a goal", async function () {
     // Set a goal by user one
     await expect(

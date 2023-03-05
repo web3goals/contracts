@@ -3,10 +3,16 @@ import {
   goalContract,
   goalParams,
   makeSuiteCleanRoom,
+  profileContract,
+  profileUris,
   userOne,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Verifying", function () {
+  beforeEach(async function () {
+    await profileContract.connect(userOne).setURI(profileUris.one);
+  });
+
   it("User should be able to set a goal and verify it with any proof uri", async function () {
     // Set goal
     await expect(

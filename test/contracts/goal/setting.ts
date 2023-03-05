@@ -1,14 +1,20 @@
+import { expect } from "chai";
+import { ethers } from "hardhat";
 import {
   goalContract,
   goalParams,
   makeSuiteCleanRoom,
+  profileContract,
+  profileUris,
   userOne,
   userOneAddress,
 } from "../../setup";
-import { expect } from "chai";
-import { ethers } from "hardhat";
 
 makeSuiteCleanRoom("Goal Setting", function () {
+  beforeEach(async function () {
+    await profileContract.connect(userOne).setURI(profileUris.one);
+  });
+
   it("User should be able to set a goal", async function () {
     // Set goal
     const tx = goalContract

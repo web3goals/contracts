@@ -4,6 +4,8 @@ import {
   goalParams,
   goalWatcherExtraDataUris,
   makeSuiteCleanRoom,
+  profileContract,
+  profileUris,
   userOne,
   userThree,
   userThreeAddress,
@@ -11,6 +13,12 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Accepting Watchers", function () {
+  beforeEach(async function () {
+    await profileContract.connect(userOne).setURI(profileUris.one);
+    await profileContract.connect(userTwo).setURI(profileUris.two);
+    await profileContract.connect(userThree).setURI(profileUris.three);
+  });
+
   it("Goal author should be able to accept a watcher", async function () {
     // Set a goal by user one
     await expect(

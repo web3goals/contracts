@@ -55,6 +55,7 @@ export const goalWatcherExtraDataUris = {
 export const profileUris = {
   one: "ipfs://abc",
   two: "ipfs://def",
+  three: "ipfs://123",
 };
 
 export let accounts: Array<Signer>;

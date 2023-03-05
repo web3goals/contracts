@@ -9,10 +9,12 @@ library Errors {
     error UnableTransfer();
 
     // Goal errors
+    error ProfileAddressNotExists();
+    error ProfileNotExists();
     error MessageValueMismatch();
     error StakeInvalid();
     error DeadlineMustBeAtLeast24HoursLater();
-    error VerifierNotFound();
+    error VerifierAddressNotExists();
     error GoalClosed();
     error AuthorCannotBeWatcher();
     error AlreadyWatcher();

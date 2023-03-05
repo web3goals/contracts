@@ -97,6 +97,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         string[] memory verificationDataValues
     ) public payable whenNotPaused returns (uint256) {
         // Base checks
+        if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
         if (msg.value != stake) revert Errors.MessageValueMismatch();
         if (stake <= 0) revert Errors.StakeInvalid();
         if (deadlineTimestamp < block.timestamp + Constants.SECONDS_PER_DAY)
@@ -104,7 +105,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (
             IHub(_hubAddress).getVerifierAddress(verificationRequirement) ==
             address(0)
-        ) revert Errors.VerifierNotFound();
+        ) revert Errors.VerifierAddressNotExists();
         // Update counter
         _counter.increment();
         // Mint token
@@ -138,6 +139,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         string memory extraDataURI
     ) public whenNotPaused {
         // Base Checks
+        if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress == msg.sender)
@@ -330,13 +332,23 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     /// ***** INTERNAL FUNCTIONS *****
     /// ******************************
 
+    function _isHasProfile(
+        address accountAddress
+    ) internal view returns (bool) {
+        address profileAddress = IHub(_hubAddress).getProfileAddress();
+        if (profileAddress == address(0))
+            revert Errors.ProfileAddressNotExists();
+        return IERC721Upgradeable(profileAddress).balanceOf(accountAddress) > 0;
+    }
+
     function _getVerifierAddress(
         uint256 tokenId
     ) internal view returns (address) {
         address verifierAddress = IHub(_hubAddress).getVerifierAddress(
             _params[tokenId].verificationRequirement
         );
-        if (verifierAddress == address(0)) revert Errors.VerifierNotFound();
+        if (verifierAddress == address(0))
+            revert Errors.VerifierAddressNotExists();
         return verifierAddress;
     }
 

@@ -1,14 +1,14 @@
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import {
-  AnyProofVerifier,
-  AnyProofVerifier__factory,
   Goal,
   Goal__factory,
   Hub,
   Hub__factory,
   Profile,
   Profile__factory,
+  TrustingVerifier,
+  TrustingVerifier__factory,
 } from "../typechain-types";
 import {
   getEpochSeconds,
@@ -25,11 +25,11 @@ export const goalContractParams = {
 };
 
 export const goalVerificationRequirements = {
-  anyProof: "ANY_PROOF",
+  anyProofUri: "ANY_PROOF_URI",
 };
 
 export const goalVerificationDataKeys = {
-  anyUri: "ANY_URI",
+  anyProofUri: "ANY_PROOF_URI",
 };
 
 export const goalParams = {
@@ -37,10 +37,10 @@ export const goalParams = {
     description: "Train every week for 3 months",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
-    verificationRequirement: goalVerificationRequirements.anyProof,
+    verificationRequirement: goalVerificationRequirements.anyProofUri,
     verificationDataKeys: [],
     verificationDataValues: [],
-    additionalVerificationDataKeys: [goalVerificationDataKeys.anyUri],
+    additionalVerificationDataKeys: [goalVerificationDataKeys.anyProofUri],
     additionalVerificationDataValues: ["ipfs://..."],
     stakeForKeeper: BigNumber.from("5000000000000000"),
     stakeForWatchers: BigNumber.from("45000000000000000"),
@@ -69,7 +69,7 @@ export let userTwoAddress: string;
 export let userThreeAddress: string;
 
 export let hubContract: Hub;
-export let anyProofVerifier: AnyProofVerifier;
+export let trustingVerifier: TrustingVerifier;
 export let goalContract: Goal;
 export let keeperContract: Keeper;
 export let profileContract: Profile;
@@ -111,7 +111,7 @@ before(async function () {
   );
 
   // Deploy verifiers contracts
-  anyProofVerifier = await new AnyProofVerifier__factory(deployer).deploy(
+  trustingVerifier = await new TrustingVerifier__factory(deployer).deploy(
     hubContract.address
   );
 
@@ -133,8 +133,8 @@ before(async function () {
   // Set hub addresses
   await expect(
     hubContract.setVerifierAddress(
-      goalVerificationRequirements.anyProof,
-      anyProofVerifier.address
+      goalVerificationRequirements.anyProofUri,
+      trustingVerifier.address
     )
   ).to.be.not.reverted;
   await expect(

@@ -1,10 +1,10 @@
 import hre, { ethers } from "hardhat";
 import {
-  AnyProofVerifier__factory,
   Goal__factory,
   Hub__factory,
   Keeper__factory,
   Profile__factory,
+  TrustingVerifier__factory,
 } from "../typechain-types";
 import { contractsData, deployedContracts } from "./helpers/constants";
 import { deployWithLogs, upgradeProxyWithLogs } from "./helpers/utils";
@@ -79,11 +79,11 @@ async function main() {
       continue;
     }
     let contract;
-    if (verifier.verificationRequirement === "ANY_PROOF") {
+    if (verifier.verificationRequirement === "ANY_PROOF_URI") {
       contract = await deployWithLogs({
         chainName: chain,
         contractName: verifier.contract.name,
-        contractFactory: new AnyProofVerifier__factory(deployerWallet),
+        contractFactory: new TrustingVerifier__factory(deployerWallet),
         contractConstructorArgs: [chainContracts.hub.proxy],
         isProxyRequired: verifier.contract.isUpgreadable,
         isInitializeRequired: verifier.contract.isInitializable,

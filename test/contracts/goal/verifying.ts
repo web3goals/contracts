@@ -41,6 +41,6 @@ makeSuiteCleanRoom("Goal Verifying", function () {
       setGoalId
     );
     expect(verificationStatus.isAchieved).to.equal(true);
-    expect(verificationStatus.isFailed).to.equal(true);
+    expect(verificationStatus.isFailed).to.equal(false);
   });
 });

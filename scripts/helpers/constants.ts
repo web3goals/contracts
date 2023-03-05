@@ -15,7 +15,7 @@ export const deployedContracts: {
     keeper: DeployedContract;
     profile: DeployedContract;
     verifiers: Array<{
-      verificationRequirement: "ANY_PROOF";
+      verificationRequirement: "ANY_PROOF_URI";
       contract: DeployedContract;
     }>;
   };
@@ -59,9 +59,9 @@ export const deployedContracts: {
     },
     verifiers: [
       {
-        verificationRequirement: "ANY_PROOF",
+        verificationRequirement: "ANY_PROOF_URI",
         contract: {
-          name: "AnyProofVerifier",
+          name: "TrustingVerifier",
           version: "0.1",
           isUpgreadable: false,
           isInitializable: false,
@@ -106,9 +106,9 @@ export const deployedContracts: {
     },
     verifiers: [
       {
-        verificationRequirement: "ANY_PROOF",
+        verificationRequirement: "ANY_PROOF_URI",
         contract: {
-          name: "AnyProofVerifier",
+          name: "TrustingVerifier",
           version: "0.1",
           isUpgreadable: false,
           isInitializable: false,

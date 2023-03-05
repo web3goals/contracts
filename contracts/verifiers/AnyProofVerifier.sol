@@ -8,10 +8,10 @@ import "../interfaces/IGoal.sol";
 import "../libraries/Errors.sol";
 
 /**
- * Contract to verify a goal by any proof uri.
+ * Contract that verify a goal with any existing proof uri as achieved.
  */
 contract AnyProofVerifier is Verifier {
-    string _anyUriKey = "ANY_URI";
+    string _proofURIKey = "PROOF_URI";
 
     constructor(address hubAddress) Verifier(hubAddress) {}
 
@@ -20,11 +20,10 @@ contract AnyProofVerifier is Verifier {
         if (msg.sender != IHub(_hubAddress).getGoalAddress())
             revert Errors.NotGoalContract();
         // Check verification data
-        string memory anyUri = IGoal(IHub(_hubAddress).getGoalAddress())
-            .getVerificationData(goalTokenId, _anyUriKey);
-        if (Strings.equal(anyUri, "")) revert Errors.AnyProofNotExists();
+        string memory proofURI = IGoal(IHub(_hubAddress).getGoalAddress())
+            .getVerificationData(goalTokenId, _proofURIKey);
+        if (Strings.equal(proofURI, "")) revert Errors.ProofURINotExists();
         // Update verification status
         _goalsVerifiedAsAchieved[goalTokenId] = true;
-        _goalsVerifiedAsFailed[goalTokenId] = true;
     }
 }

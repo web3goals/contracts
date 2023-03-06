@@ -413,15 +413,14 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
+        emit ParamsSet(tokenId, _params[tokenId]);
+        emit ClosedAsFailed(tokenId);
         // Update reputation for creator
         _accountReputations[_params[tokenId].authorAddress].failedGoals++;
         emit AccountReputationSet(
             _params[tokenId].authorAddress,
             _accountReputations[_params[tokenId].authorAddress]
         );
-        // Emit events
-        emit ParamsSet(tokenId, _params[tokenId]);
-        emit ClosedAsFailed(tokenId);
         // Define number of accepted watchers
         uint acceptedWatchersNumber = 0;
         for (uint i = 0; i < _watchers[tokenId].length; i++) {

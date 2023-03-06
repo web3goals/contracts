@@ -10,9 +10,9 @@ import {
   userThreeAddress,
   userTwo,
   userTwoAddress,
-} from "../setup";
+} from "../../setup";
 
-makeSuiteCleanRoom("Profile", function () {
+makeSuiteCleanRoom("Profile Setting", function () {
   it("User should to own only one token after several uri changes", async function () {
     // Before changes
     expect(await profileContract.balanceOf(userOneAddress)).to.equal(

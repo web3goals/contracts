@@ -1,24 +1,27 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
 import {
+  makeSuiteCleanRoom,
   profileContract,
   profileUris,
-  makeSuiteCleanRoom,
   userOne,
   userOneAddress,
-  userThreeAddress,
-  userTwo,
-  userTwoAddress,
 } from "../../setup";
 
 makeSuiteCleanRoom("Profile Setting", function () {
-  it("User should to own only one token after several uri changes", async function () {
-    // Before changes
+  it("User should be able to set a token uri", async function () {
+    await expect(
+      profileContract.connect(userOne).setURI(profileUris.one)
+    ).to.be.not.reverted;
     expect(await profileContract.balanceOf(userOneAddress)).to.equal(
-      ethers.constants.Zero
+      BigNumber.from(1)
     );
-    expect(await profileContract.getURI(userOneAddress)).to.equal("");
+    expect(await profileContract.getURI(userOneAddress)).to.equal(
+      profileUris.one
+    );
+  });
+
+  it("User should to own only one token after several uri changes", async function () {
     // First change
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)
@@ -39,20 +42,5 @@ makeSuiteCleanRoom("Profile Setting", function () {
     expect(await profileContract.getURI(userOneAddress)).to.equal(
       profileUris.two
     );
-  });
-
-  it("User should fail to transfer token", async function () {
-    // Set uri
-    await expect(
-      profileContract.connect(userTwo).setURI(profileUris.one)
-    ).to.be.not.reverted;
-    // Get token id
-    const tokenId = await profileContract.getTokenId(userTwoAddress);
-    // Transfer
-    await expect(
-      profileContract
-        .connect(userTwo)
-        .transferFrom(userTwoAddress, userThreeAddress, tokenId)
-    ).to.be.reverted;
   });
 });

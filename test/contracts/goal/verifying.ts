@@ -1,16 +1,15 @@
 import { expect } from "chai";
 import {
+  createProfiles,
   goalContract,
   goalParams,
   makeSuiteCleanRoom,
-  profileContract,
-  profileUris,
   userOne,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Verifying", function () {
   beforeEach(async function () {
-    await profileContract.connect(userOne).setURI(profileUris.one);
+    await createProfiles();
   });
 
   it("User should be able to set a goal and verify it with any proof uri", async function () {
@@ -30,22 +29,20 @@ makeSuiteCleanRoom("Goal Verifying", function () {
           }
         )
     ).to.be.not.reverted;
-    // Get set goal id
-    const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
+    // Get goal id
+    const goalId = await goalContract.connect(userOne).getCurrentCounter();
     // Verify goal
     await expect(
       goalContract
         .connect(userOne)
         .addVerificationDataAndVerify(
-          setGoalId,
+          goalId,
           goalParams.one.additionalVerificationDataKeys,
           goalParams.one.additionalVerificationDataValues
         )
     ).to.be.not.reverted;
     // Check goal verification status
-    const verificationStatus = await goalContract.getVerificationStatus(
-      setGoalId
-    );
+    const verificationStatus = await goalContract.getVerificationStatus(goalId);
     expect(verificationStatus.isAchieved).to.equal(true);
     expect(verificationStatus.isFailed).to.equal(false);
   });

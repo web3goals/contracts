@@ -4,60 +4,111 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { SECONDS_PER_DAY } from "../../helpers/constants";
 import {
+  createProfiles,
   goalContract,
   goalParams,
   goalWatcherExtraDataUris,
   keeperContract,
   makeSuiteCleanRoom,
-  profileContract,
-  profileUris,
+  userFour,
+  userFourAddress,
   userOne,
   userOneAddress,
   userThree,
-  userThreeAddress,
   userTwo,
   userTwoAddress,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Closing", function () {
+  let goalNotVerified: BigNumber;
+  let goalVerified: BigNumber;
+  let goalVerifiedWithWatchers: BigNumber;
+
   beforeEach(async function () {
-    await profileContract.connect(userOne).setURI(profileUris.one);
-    await profileContract.connect(userTwo).setURI(profileUris.two);
-    await profileContract.connect(userThree).setURI(profileUris.three);
+    // Create profiles
+    await createProfiles();
+    // Set goal by user one
+    await goalContract
+      .connect(userOne)
+      .set(
+        goalParams.one.description,
+        goalParams.one.stake,
+        goalParams.one.deadlineTimestamp,
+        goalParams.one.verificationRequirement,
+        goalParams.one.verificationDataKeys,
+        goalParams.one.verificationDataValues,
+        {
+          value: goalParams.one.stake,
+        }
+      );
+    goalNotVerified = await goalContract.connect(userOne).getCurrentCounter();
+    // Set and verify goal by user one
+    await goalContract
+      .connect(userOne)
+      .set(
+        goalParams.one.description,
+        goalParams.one.stake,
+        goalParams.one.deadlineTimestamp,
+        goalParams.one.verificationRequirement,
+        goalParams.one.verificationDataKeys,
+        goalParams.one.verificationDataValues,
+        {
+          value: goalParams.one.stake,
+        }
+      );
+    goalVerified = await goalContract.connect(userOne).getCurrentCounter();
+    await goalContract
+      .connect(userOne)
+      .addVerificationDataAndVerify(
+        goalVerified,
+        goalParams.one.additionalVerificationDataKeys,
+        goalParams.one.additionalVerificationDataValues
+      );
+    // Set and verify goal, add and accept watchers by user one
+    await goalContract
+      .connect(userOne)
+      .set(
+        goalParams.one.description,
+        goalParams.one.stake,
+        goalParams.one.deadlineTimestamp,
+        goalParams.one.verificationRequirement,
+        goalParams.one.verificationDataKeys,
+        goalParams.one.verificationDataValues,
+        {
+          value: goalParams.one.stake,
+        }
+      );
+    goalVerifiedWithWatchers = await goalContract
+      .connect(userOne)
+      .getCurrentCounter();
+    await goalContract
+      .connect(userOne)
+      .addVerificationDataAndVerify(
+        goalVerifiedWithWatchers,
+        goalParams.one.additionalVerificationDataKeys,
+        goalParams.one.additionalVerificationDataValues
+      );
+    await goalContract
+      .connect(userTwo)
+      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.two);
+    await goalContract
+      .connect(userThree)
+      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.three);
+    await goalContract
+      .connect(userFour)
+      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.four);
+    await goalContract
+      .connect(userOne)
+      .acceptWatcher(goalVerifiedWithWatchers, userTwoAddress);
+    await goalContract
+      .connect(userOne)
+      .acceptWatcher(goalVerifiedWithWatchers, userFourAddress);
   });
 
-  it("Goal author should be able to close a goal after verification as achieved and return stake", async function () {
-    // Set goal
-    await expect(
-      goalContract
-        .connect(userOne)
-        .set(
-          goalParams.one.description,
-          goalParams.one.stake,
-          goalParams.one.deadlineTimestamp,
-          goalParams.one.verificationRequirement,
-          goalParams.one.verificationDataKeys,
-          goalParams.one.verificationDataValues,
-          {
-            value: goalParams.one.stake,
-          }
-        )
-    ).to.be.not.reverted;
-    // Get set goal id
-    const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
-    // Verify goal
-    await expect(
-      goalContract
-        .connect(userOne)
-        .addVerificationDataAndVerify(
-          setGoalId,
-          goalParams.one.additionalVerificationDataKeys,
-          goalParams.one.additionalVerificationDataValues
-        )
-    ).to.be.not.reverted;
+  it("Goal author should be able to close a goal verified as achieved before deadline and return stake", async function () {
     // Close goal
     await expect(
-      goalContract.connect(userOne).close(setGoalId)
+      goalContract.connect(userOne).close(goalVerified)
     ).to.changeEtherBalances(
       [userOne, goalContract.address],
       [
@@ -66,7 +117,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       ]
     );
     // Check goal params
-    const params = await goalContract.getParams(setGoalId);
+    const params = await goalContract.getParams(goalVerified);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
     // Check account reputation
@@ -75,30 +126,51 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.equal(1);
   });
 
-  it("Goal author should be able to close a goal after deadline as failed and stake should be send to keeper", async function () {
-    // Set goal
+  it("Goal author should be able to close a goal verified as achieved with watchers before deadline and return stake", async function () {
+    // Close goal
     await expect(
-      goalContract
-        .connect(userOne)
-        .set(
-          goalParams.one.description,
-          goalParams.one.stake,
-          goalParams.one.deadlineTimestamp,
-          goalParams.one.verificationRequirement,
-          goalParams.one.verificationDataKeys,
-          goalParams.one.verificationDataValues,
-          {
-            value: goalParams.one.stake,
-          }
-        )
-    ).to.be.not.reverted;
-    // Get set goal id
-    const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
+      goalContract.connect(userOne).close(goalVerifiedWithWatchers)
+    ).to.changeEtherBalances(
+      [userOne, goalContract.address],
+      [
+        goalParams.one.stake,
+        goalParams.one.stake.mul(ethers.constants.NegativeOne),
+      ]
+    );
+    // Check goal params
+    const params = await goalContract.getParams(goalVerifiedWithWatchers);
+    expect(params.isClosed).to.equal(true);
+    expect(params.isAchieved).to.equal(true);
+    // Check account reputation
+    expect(
+      (await goalContract.getAccountReputation(userOneAddress)).achievedGoals
+    ).to.equal(1);
+    expect(
+      (await goalContract.getAccountReputation(userTwoAddress)).motivatedGoals
+    ).to.equal(1);
+    expect(
+      (await goalContract.getAccountReputation(userFourAddress)).motivatedGoals
+    ).to.equal(1);
+  });
+
+  it("Goal author should not be able to close a not verified goal before deadline", async function () {
+    await expect(
+      goalContract.connect(userOne).close(goalNotVerified)
+    ).to.be.reverted;
+  });
+
+  it("Not goal author should not be able to close a goal verified as achieved before deadline", async function () {
+    await expect(
+      goalContract.connect(userTwo).close(goalVerified)
+    ).to.be.reverted;
+  });
+
+  it("Not goal author should be able to close a goal after deadline and stake should be send to keeper", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
-      goalContract.connect(userOne).close(setGoalId)
+      goalContract.connect(userTwo).close(goalVerified)
     ).to.changeEtherBalances(
       [userOne, keeperContract.address, goalContract.address],
       [
@@ -108,7 +180,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       ]
     );
     // Check goal params
-    const params = await goalContract.getParams(setGoalId);
+    const params = await goalContract.getParams(goalVerified);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
     // Check account reputation
@@ -117,51 +189,14 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.equal(1);
   });
 
-  it("Accepted goal watcher should be able to close a goal after deadline and stake should be send to keeper and accepted watchers", async function () {
-    // Set goal by user onw
-    await expect(
-      goalContract
-        .connect(userOne)
-        .set(
-          goalParams.one.description,
-          goalParams.one.stake,
-          goalParams.one.deadlineTimestamp,
-          goalParams.one.verificationRequirement,
-          goalParams.one.verificationDataKeys,
-          goalParams.one.verificationDataValues,
-          {
-            value: goalParams.one.stake,
-          }
-        )
-    ).to.be.not.reverted;
-    // Get set goal id
-    const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
-    // Watch goal by user two
-    await expect(
-      goalContract
-        .connect(userTwo)
-        .watch(setGoalId, goalWatcherExtraDataUris.one)
-    ).to.be.not.reverted;
-    // Watch goal by user three
-    await expect(
-      goalContract
-        .connect(userThree)
-        .watch(setGoalId, goalWatcherExtraDataUris.two)
-    ).to.be.not.reverted;
-    // Accept all watchers by user one
-    await expect(
-      goalContract.connect(userOne).acceptWatcher(setGoalId, userTwoAddress)
-    ).to.be.not.reverted;
-    await expect(
-      goalContract.connect(userOne).acceptWatcher(setGoalId, userThreeAddress)
-    ).to.be.not.reverted;
+  it("Not goal author should be able to close a goal with watchers after deadline and stake should be send to keeper and accepted watchers", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
-    // Close goal by user two
+    // Close goal
     await expect(
-      goalContract.connect(userTwo).close(setGoalId)
+      goalContract.connect(userTwo).close(goalVerifiedWithWatchers)
     ).to.changeEtherBalances(
-      [userTwo, userThree, keeperContract.address, goalContract.address],
+      [userTwo, userFour, keeperContract.address, goalContract.address],
       [
         goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
         goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
@@ -170,7 +205,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       ]
     );
     // Check goal params
-    const params = await goalContract.getParams(setGoalId);
+    const params = await goalContract.getParams(goalVerifiedWithWatchers);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
     // Check accounts reputation
@@ -181,7 +216,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       (await goalContract.getAccountReputation(userTwoAddress)).motivatedGoals
     ).to.equal(0);
     expect(
-      (await goalContract.getAccountReputation(userThreeAddress)).motivatedGoals
+      (await goalContract.getAccountReputation(userFourAddress)).motivatedGoals
     ).to.equal(0);
   });
 });

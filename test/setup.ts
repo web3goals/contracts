@@ -50,12 +50,15 @@ export const goalParams = {
 export const goalWatcherExtraDataUris = {
   one: "ipfs://abc",
   two: "ipfs://def",
+  three: "ipfs://123",
+  four: "ipfs://456",
 };
 
 export const profileUris = {
   one: "ipfs://abc",
   two: "ipfs://def",
   three: "ipfs://123",
+  four: "ipfs://456",
 };
 
 export let accounts: Array<Signer>;
@@ -63,11 +66,13 @@ export let deployer: Signer;
 export let userOne: Signer;
 export let userTwo: Signer;
 export let userThree: Signer;
+export let userFour: Signer;
 
 export let deployerAddress: string;
 export let userOneAddress: string;
 export let userTwoAddress: string;
 export let userThreeAddress: string;
+export let userFourAddress: string;
 
 export let hubContract: Hub;
 export let trustingVerifier: TrustingVerifier;
@@ -87,6 +92,13 @@ export function makeSuiteCleanRoom(name: string, tests: () => void) {
   });
 }
 
+export async function createProfiles() {
+  await profileContract.connect(userOne).setURI(profileUris.one);
+  await profileContract.connect(userTwo).setURI(profileUris.two);
+  await profileContract.connect(userThree).setURI(profileUris.three);
+  await profileContract.connect(userFour).setURI(profileUris.four);
+}
+
 before(async function () {
   // Init accounts
   accounts = await ethers.getSigners();
@@ -94,12 +106,14 @@ before(async function () {
   userOne = accounts[1];
   userTwo = accounts[2];
   userThree = accounts[3];
+  userFour = accounts[4];
 
   // Init addresses
   deployerAddress = await deployer.getAddress();
   userOneAddress = await userOne.getAddress();
   userTwoAddress = await userTwo.getAddress();
   userThreeAddress = await userThree.getAddress();
+  userFourAddress = await userFour.getAddress();
 
   // Deploy hub contract
   hubContract = await new Hub__factory(deployer).deploy();

@@ -1,49 +1,71 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {
+  createProfiles,
   goalContract,
   goalParams,
   makeSuiteCleanRoom,
-  profileContract,
-  profileUris,
   userOne,
   userOneAddress,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Setting", function () {
-  beforeEach(async function () {
-    await profileContract.connect(userOne).setURI(profileUris.one);
-  });
-
   it("User should be able to set a goal", async function () {
+    // Create profiles
+    await createProfiles();
     // Set goal
-    const tx = goalContract
-      .connect(userOne)
-      .set(
-        goalParams.one.description,
-        goalParams.one.stake,
-        goalParams.one.deadlineTimestamp,
-        goalParams.one.verificationRequirement,
-        goalParams.one.verificationDataKeys,
-        goalParams.one.verificationDataValues,
-        {
-          value: goalParams.one.stake,
-        }
-      );
-    await expect(tx).to.be.not.reverted;
-    await expect(tx).to.changeEtherBalances(
+    await expect(
+      goalContract
+        .connect(userOne)
+        .set(
+          goalParams.one.description,
+          goalParams.one.stake,
+          goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
+          {
+            value: goalParams.one.stake,
+          }
+        )
+    ).to.changeEtherBalances(
       [userOne, goalContract.address],
       [
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
         goalParams.one.stake,
       ]
     );
-    // Get set goal id
-    const setGoalId = await goalContract.connect(userOne).getCurrentCounter();
+    // Get goal id
+    const goalId = await goalContract.connect(userOne).getCurrentCounter();
     // Check goal params
-    const params = await goalContract.getParams(setGoalId);
+    const params = await goalContract.getParams(goalId);
+    expect(params.description).to.equal(goalParams.one.description);
     expect(params.authorAddress).to.equal(userOneAddress);
     expect(params.authorStake).to.equal(goalParams.one.stake);
     expect(params.deadlineTimestamp).to.equal(goalParams.one.deadlineTimestamp);
+    expect(params.isClosed).to.equal(false);
+    expect(params.isAchieved).to.equal(false);
+    expect(params.verificationRequirement).to.equal(
+      goalParams.one.verificationRequirement
+    );
+  });
+
+  it("User should not be able to set a goal without profile", async function () {
+    // Set goal
+    await expect(
+      goalContract
+        .connect(userOne)
+        .set(
+          goalParams.one.description,
+          goalParams.one.stake,
+          goalParams.one.deadlineTimestamp,
+          goalParams.one.verificationRequirement,
+          goalParams.one.verificationDataKeys,
+          goalParams.one.verificationDataValues,
+          {
+            value: goalParams.one.stake,
+          }
+        )
+    ).to.be.reverted;
   });
 });

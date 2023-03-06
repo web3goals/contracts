@@ -1,26 +1,30 @@
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import {
   makeSuiteCleanRoom,
   profileContract,
   profileUris,
-  userThreeAddress,
-  userTwo,
+  userOne,
+  userOneAddress,
   userTwoAddress,
 } from "../../setup";
 
 makeSuiteCleanRoom("Profile Transfering", function () {
-  it("User should fail to transfer token", async function () {
-    // Set uri
+  let profile: BigNumber;
+
+  beforeEach(async function () {
+    // Set uri by user one
     await expect(
-      profileContract.connect(userTwo).setURI(profileUris.one)
+      profileContract.connect(userOne).setURI(profileUris.one)
     ).to.be.not.reverted;
-    // Get token id
-    const tokenId = await profileContract.getTokenId(userTwoAddress);
-    // Transfer
+    profile = await profileContract.getTokenId(userOneAddress);
+  });
+
+  it("Profile token owner should fail to transfer token", async function () {
     await expect(
       profileContract
-        .connect(userTwo)
-        .transferFrom(userTwoAddress, userThreeAddress, tokenId)
+        .connect(userOne)
+        .transferFrom(userOneAddress, userTwoAddress, profile)
     ).to.be.reverted;
   });
 });

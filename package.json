@@ -1,6 +1,6 @@
 {
   "name": "web3goals-contracts",
-  "version": "0.2",
+  "version": "0.2.1",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@openzeppelin/hardhat-upgrades": "^1.22.0",

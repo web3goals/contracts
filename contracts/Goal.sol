@@ -187,6 +187,24 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         emit WatcherSet(tokenId, watcher.accountAddress, watcher);
     }
 
+    function addVerificationData(
+        uint tokenId,
+        string[] memory verificationDataKeys,
+        string[] memory verificationDataValues
+    ) public whenNotPaused {
+        // Base Checks
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (_params[tokenId].authorAddress != msg.sender)
+            revert Errors.NotAuthor();
+        // Add verification data
+        _addVerificationData(
+            tokenId,
+            verificationDataKeys,
+            verificationDataValues
+        );
+    }
+
     function verify(uint tokenId) public whenNotPaused {
         addVerificationDataAndVerify(tokenId, new string[](0), new string[](0));
     }

@@ -32,12 +32,12 @@ export const deployedContracts: {
     },
     goal: {
       name: "Goal",
-      version: "0.2",
+      version: "0.2.1",
       isUpgreadable: true,
       isInitializable: true,
-      proxy: "0x8969B2687E4cbB89E37FB2ee7D0A9d820d968815",
+      proxy: "0x93B2c230b3c7521201b9c50283d48E6764e83630",
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
-      impl: "0xE2c3D3bc0E902CE14fC469cc536608b1b9ce6517",
+      impl: "0xe8AC6B45AcC62CB4cB87c4b906eaC40bd0976FCE",
     },
     keeper: {
       name: "Keeper",

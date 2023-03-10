@@ -222,10 +222,12 @@ makeSuiteCleanRoom("Goal Closing", function () {
       (await goalContract.getAccountReputation(userOneAddress)).failedGoals
     ).to.equal(1);
     expect(
-      (await goalContract.getAccountReputation(userTwoAddress)).motivatedGoals
-    ).to.equal(0);
+      (await goalContract.getAccountReputation(userTwoAddress))
+        .notMotivatedGoals
+    ).to.equal(1);
     expect(
-      (await goalContract.getAccountReputation(userFourAddress)).motivatedGoals
-    ).to.equal(0);
+      (await goalContract.getAccountReputation(userFourAddress))
+        .notMotivatedGoals
+    ).to.equal(1);
   });
 });

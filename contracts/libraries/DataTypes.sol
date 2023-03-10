@@ -24,5 +24,6 @@ library DataTypes {
         uint achievedGoals;
         uint failedGoals;
         uint motivatedGoals;
+        uint notMotivatedGoals;
     }
 }

@@ -439,6 +439,17 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _params[tokenId].authorAddress,
             _accountReputations[_params[tokenId].authorAddress]
         );
+        // Update reputation for accepted motivators
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].isAccepted) {
+                _accountReputations[_motivators[tokenId][i].accountAddress]
+                    .notMotivatedGoals++;
+                emit AccountReputationSet(
+                    _motivators[tokenId][i].accountAddress,
+                    _accountReputations[_motivators[tokenId][i].accountAddress]
+                );
+            }
+        }
         // Define number of accepted motivators
         uint acceptedMotivatorNumber = 0;
         for (uint i = 0; i < _motivators[tokenId].length; i++) {

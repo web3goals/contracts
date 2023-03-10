@@ -15,16 +15,16 @@ import "./libraries/Errors.sol";
 import "./libraries/Constants.sol";
 
 /**
- * Contract to set, verify, close goal or become a goal watcher.
+ * Contract to set, verify, close goal or become a goal motivator.
  */
 contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     using Counters for Counters.Counter;
 
     event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams params);
-    event WatcherSet(
+    event MotivatorSet(
         uint256 indexed tokenId,
-        address indexed watcherAccountAddress,
-        DataTypes.GoalWatcher watcher
+        address indexed motivatorAccountAddress,
+        DataTypes.GoalMotivator motivator
     );
     event AccountReputationSet(
         address indexed accountAddress,
@@ -45,7 +45,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     Counters.Counter private _counter;
     mapping(uint256 => DataTypes.GoalParams) private _params;
     mapping(uint256 => mapping(string => string)) _verificationData;
-    mapping(uint256 => DataTypes.GoalWatcher[]) private _watchers;
+    mapping(uint256 => DataTypes.GoalMotivator[]) private _motivators;
     mapping(address => DataTypes.AccountReputation) private _accountReputations;
 
     function initialize(
@@ -84,9 +84,9 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         _imageSVG = imageSVG;
     }
 
-    /// ****************************************
-    /// ***** AUTHOR AND WATCHER FUNCTIONS *****
-    /// ****************************************
+    /// ******************************************
+    /// ***** AUTHOR AND MOTIVATOR FUNCTIONS *****
+    /// ******************************************
 
     function set(
         string memory description,
@@ -134,7 +134,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         return newTokenId;
     }
 
-    function watch(
+    function becomeMotivator(
         uint256 tokenId,
         string memory extraDataURI
     ) public whenNotPaused {
@@ -143,48 +143,48 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress == msg.sender)
-            revert Errors.AuthorCannotBeWatcher();
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].accountAddress == msg.sender) {
-                revert Errors.AlreadyWatcher();
+            revert Errors.AuthorCannotBeMotivator();
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].accountAddress == msg.sender) {
+                revert Errors.AlreadyMotivator();
             }
         }
-        // Add watcher
-        DataTypes.GoalWatcher memory tokenWatcher = DataTypes.GoalWatcher(
+        // Add motivator
+        DataTypes.GoalMotivator memory motivator = DataTypes.GoalMotivator(
             block.timestamp,
             msg.sender,
             false,
             extraDataURI
         );
-        _watchers[tokenId].push(tokenWatcher);
-        emit WatcherSet(tokenId, tokenWatcher.accountAddress, tokenWatcher);
+        _motivators[tokenId].push(motivator);
+        emit MotivatorSet(tokenId, motivator.accountAddress, motivator);
     }
 
-    function acceptWatcher(
+    function acceptMotivator(
         uint256 tokenId,
-        address watcherAddress
+        address motivatorAddress
     ) public whenNotPaused {
         // Base checks
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
-        // Check watcher
-        uint watcherIndex = 2 ^ (256 - 1);
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].accountAddress == watcherAddress) {
-                watcherIndex = i;
+        // Check motivator
+        uint motivatorIndex = 2 ^ (256 - 1);
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].accountAddress == motivatorAddress) {
+                motivatorIndex = i;
             }
         }
-        if (watcherIndex == 2 ^ (256 - 1)) revert Errors.WatcherNotFound();
-        DataTypes.GoalWatcher storage watcher = _watchers[tokenId][
-            watcherIndex
+        if (motivatorIndex == 2 ^ (256 - 1)) revert Errors.MotivatorNotFound();
+        DataTypes.GoalMotivator storage motivator = _motivators[tokenId][
+            motivatorIndex
         ];
-        if (watcher.isAccepted) revert Errors.AlreadyAccepted();
-        // Update watcher
-        watcher.isAccepted = true;
+        if (motivator.isAccepted) revert Errors.AlreadyAccepted();
+        // Update motivator
+        motivator.isAccepted = true;
         // Emit events
-        emit WatcherSet(tokenId, watcher.accountAddress, watcher);
+        emit MotivatorSet(tokenId, motivator.accountAddress, motivator);
     }
 
     function addVerificationData(
@@ -269,10 +269,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         return _params[tokenId];
     }
 
-    function getWatchers(
+    function getMotivators(
         uint256 tokenId
-    ) public view returns (DataTypes.GoalWatcher[] memory) {
-        return _watchers[tokenId];
+    ) public view returns (DataTypes.GoalMotivator[] memory) {
+        return _motivators[tokenId];
     }
 
     function getAccountReputation(
@@ -409,14 +409,14 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _params[tokenId].authorAddress,
             _accountReputations[_params[tokenId].authorAddress]
         );
-        // Update reputation for accepted watchers
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].isAccepted) {
-                _accountReputations[_watchers[tokenId][i].accountAddress]
+        // Update reputation for accepted motivators
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].isAccepted) {
+                _accountReputations[_motivators[tokenId][i].accountAddress]
                     .motivatedGoals++;
                 emit AccountReputationSet(
-                    _watchers[tokenId][i].accountAddress,
-                    _accountReputations[_watchers[tokenId][i].accountAddress]
+                    _motivators[tokenId][i].accountAddress,
+                    _accountReputations[_motivators[tokenId][i].accountAddress]
                 );
             }
         }
@@ -439,21 +439,21 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _params[tokenId].authorAddress,
             _accountReputations[_params[tokenId].authorAddress]
         );
-        // Define number of accepted watchers
-        uint acceptedWatchersNumber = 0;
-        for (uint i = 0; i < _watchers[tokenId].length; i++) {
-            if (_watchers[tokenId][i].isAccepted) {
-                acceptedWatchersNumber++;
+        // Define number of accepted motivators
+        uint acceptedMotivatorNumber = 0;
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].isAccepted) {
+                acceptedMotivatorNumber++;
             }
         }
-        // If there are no accepted watchers, then send stake to keeper
-        if (acceptedWatchersNumber == 0) {
+        // If there are no accepted motivators, then send stake to keeper
+        if (acceptedMotivatorNumber == 0) {
             (bool sentToKepper, ) = IHub(_hubAddress).getKeeperAddress().call{
                 value: _params[tokenId].authorStake
             }("");
             if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
         }
-        // If accepted watchers exist, then send part of stake to them and part to keeper
+        // If accepted motivators exist, then send part of stake to them and part to keeper
         else {
             // Send stake to keeper
             uint stakeForKeeper = (_params[tokenId].authorStake *
@@ -462,18 +462,18 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                 value: stakeForKeeper
             }("");
             if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
-            // Send stake to watchers
-            uint stakeForWatchers = _params[tokenId].authorStake -
+            // Send stake to motivators
+            uint stakeForMotivators = _params[tokenId].authorStake -
                 stakeForKeeper;
-            for (uint i = 0; i < _watchers[tokenId].length; i++) {
-                if (_watchers[tokenId][i].isAccepted) {
-                    (bool sentToWatcher, ) = _watchers[tokenId][i]
+            for (uint i = 0; i < _motivators[tokenId].length; i++) {
+                if (_motivators[tokenId][i].isAccepted) {
+                    (bool sentToMotivator, ) = _motivators[tokenId][i]
                         .accountAddress
-                        .call{value: stakeForWatchers / acceptedWatchersNumber}(
-                        ""
-                    );
-                    if (!sentToWatcher)
-                        revert Errors.SendingStakeToWatcherFailed();
+                        .call{
+                        value: stakeForMotivators / acceptedMotivatorNumber
+                    }("");
+                    if (!sentToMotivator)
+                        revert Errors.SendingStakeToMotivatorFailed();
                 }
             }
         }

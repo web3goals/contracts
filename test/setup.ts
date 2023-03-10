@@ -43,11 +43,11 @@ export const goalParams = {
     additionalVerificationDataKeys: [goalVerificationDataKeys.anyProofUri],
     additionalVerificationDataValues: ["ipfs://..."],
     stakeForKeeper: BigNumber.from("5000000000000000"),
-    stakeForWatchers: BigNumber.from("45000000000000000"),
+    stakeForMotivators: BigNumber.from("45000000000000000"),
   },
 };
 
-export const goalWatcherExtraDataUris = {
+export const goalMotivatorExtraDataUris = {
   one: "ipfs://abc",
   two: "ipfs://def",
   three: "ipfs://123",

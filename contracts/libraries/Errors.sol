@@ -16,15 +16,15 @@ library Errors {
     error DeadlineMustBeAtLeast24HoursLater();
     error VerifierAddressNotExists();
     error GoalClosed();
-    error AuthorCannotBeWatcher();
-    error AlreadyWatcher();
+    error AuthorCannotBeMotivator();
+    error AlreadyMotivator();
     error NotAuthor();
     error NotAchieved();
-    error WatcherNotFound();
+    error MotivatorNotFound();
     error AlreadyAccepted();
     error SendingStakeToAuthorFailed();
     error SendingStakeToKeeperFailed();
-    error SendingStakeToWatcherFailed();
+    error SendingStakeToMotivatorFailed();
 
     // Verifier errors
     error NotGoalContract();

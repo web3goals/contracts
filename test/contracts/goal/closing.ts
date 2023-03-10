@@ -7,7 +7,7 @@ import {
   createProfiles,
   goalContract,
   goalParams,
-  goalWatcherExtraDataUris,
+  goalMotivatorExtraDataUris,
   keeperContract,
   makeSuiteCleanRoom,
   userFour,
@@ -22,7 +22,7 @@ import {
 makeSuiteCleanRoom("Goal Closing", function () {
   let goalNotVerified: BigNumber;
   let goalVerified: BigNumber;
-  let goalVerifiedWithWatchers: BigNumber;
+  let goalVerifiedWithMotivators: BigNumber;
 
   beforeEach(async function () {
     // Create profiles
@@ -64,7 +64,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
         goalParams.one.additionalVerificationDataKeys,
         goalParams.one.additionalVerificationDataValues
       );
-    // Set and verify goal, add and accept watchers by user one
+    // Set and verify goal, add and accept motivators by user one
     await goalContract
       .connect(userOne)
       .set(
@@ -78,31 +78,40 @@ makeSuiteCleanRoom("Goal Closing", function () {
           value: goalParams.one.stake,
         }
       );
-    goalVerifiedWithWatchers = await goalContract
+    goalVerifiedWithMotivators = await goalContract
       .connect(userOne)
       .getCurrentCounter();
     await goalContract
       .connect(userOne)
       .addVerificationDataAndVerify(
-        goalVerifiedWithWatchers,
+        goalVerifiedWithMotivators,
         goalParams.one.additionalVerificationDataKeys,
         goalParams.one.additionalVerificationDataValues
       );
     await goalContract
       .connect(userTwo)
-      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.two);
+      .becomeMotivator(
+        goalVerifiedWithMotivators,
+        goalMotivatorExtraDataUris.two
+      );
     await goalContract
       .connect(userThree)
-      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.three);
+      .becomeMotivator(
+        goalVerifiedWithMotivators,
+        goalMotivatorExtraDataUris.three
+      );
     await goalContract
       .connect(userFour)
-      .watch(goalVerifiedWithWatchers, goalWatcherExtraDataUris.four);
+      .becomeMotivator(
+        goalVerifiedWithMotivators,
+        goalMotivatorExtraDataUris.four
+      );
     await goalContract
       .connect(userOne)
-      .acceptWatcher(goalVerifiedWithWatchers, userTwoAddress);
+      .acceptMotivator(goalVerifiedWithMotivators, userTwoAddress);
     await goalContract
       .connect(userOne)
-      .acceptWatcher(goalVerifiedWithWatchers, userFourAddress);
+      .acceptMotivator(goalVerifiedWithMotivators, userFourAddress);
   });
 
   it("Goal author should be able to close a goal verified as achieved before deadline and return stake", async function () {
@@ -126,10 +135,10 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.equal(1);
   });
 
-  it("Goal author should be able to close a goal verified as achieved with watchers before deadline and return stake", async function () {
+  it("Goal author should be able to close a goal verified as achieved with motivator before deadline and return stake", async function () {
     // Close goal
     await expect(
-      goalContract.connect(userOne).close(goalVerifiedWithWatchers)
+      goalContract.connect(userOne).close(goalVerifiedWithMotivators)
     ).to.changeEtherBalances(
       [userOne, goalContract.address],
       [
@@ -138,7 +147,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       ]
     );
     // Check goal params
-    const params = await goalContract.getParams(goalVerifiedWithWatchers);
+    const params = await goalContract.getParams(goalVerifiedWithMotivators);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
     // Check account reputation
@@ -189,23 +198,23 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.equal(1);
   });
 
-  it("Not goal author should be able to close a goal with watchers after deadline and stake should be send to keeper and accepted watchers", async function () {
+  it("Not goal author should be able to close a goal with motivator after deadline and stake should be send to keeper and accepted motivators", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
-      goalContract.connect(userTwo).close(goalVerifiedWithWatchers)
+      goalContract.connect(userTwo).close(goalVerifiedWithMotivators)
     ).to.changeEtherBalances(
       [userTwo, userFour, keeperContract.address, goalContract.address],
       [
-        goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
-        goalParams.one.stakeForWatchers.div(BigNumber.from("2")),
+        goalParams.one.stakeForMotivators.div(BigNumber.from("2")),
+        goalParams.one.stakeForMotivators.div(BigNumber.from("2")),
         goalParams.one.stakeForKeeper,
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
       ]
     );
     // Check goal params
-    const params = await goalContract.getParams(goalVerifiedWithWatchers);
+    const params = await goalContract.getParams(goalVerifiedWithMotivators);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
     // Check accounts reputation

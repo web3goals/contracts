@@ -13,7 +13,7 @@ library DataTypes {
         string verificationRequirement;
     }
 
-    struct GoalWatcher {
+    struct GoalMotivator {
         uint addedTimestamp;
         address accountAddress;
         bool isAccepted;

@@ -44,7 +44,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     event ClosedAsFailed(uint256 indexed tokenId, DataTypes.GoalParams params);
     event AccountReputationSet(
         address indexed accountAddress,
-        DataTypes.AccountReputation accountReputation
+        DataTypes.GoalAccountReputation accountReputation
     );
 
     address private _hubAddress;
@@ -54,7 +54,8 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     mapping(uint256 => DataTypes.GoalParams) private _params;
     mapping(uint256 => mapping(string => string)) _verificationData;
     mapping(uint256 => DataTypes.GoalMotivator[]) private _motivators;
-    mapping(address => DataTypes.AccountReputation) private _accountReputations;
+    mapping(address => DataTypes.GoalAccountReputation)
+        private _accountReputations;
 
     function initialize(
         address hubAddress,
@@ -285,7 +286,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
 
     function getAccountReputation(
         address accountAddress
-    ) public view returns (DataTypes.AccountReputation memory) {
+    ) public view returns (DataTypes.GoalAccountReputation memory) {
         return _accountReputations[accountAddress];
     }
 

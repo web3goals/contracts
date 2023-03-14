@@ -20,7 +20,7 @@ library DataTypes {
         string extraDataURI;
     }
 
-    struct AccountReputation {
+    struct GoalAccountReputation {
         uint achievedGoals;
         uint failedGoals;
         uint motivatedGoals;

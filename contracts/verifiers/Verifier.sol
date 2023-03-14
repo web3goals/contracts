@@ -51,11 +51,13 @@ contract Verifier is IVerifier, Ownable {
     /// ******************************
 
     function _setGoalVerifiedAsAchieved(uint256 goalTokenId) internal {
+        _validateGoalIsNotVerified(goalTokenId);
         _goalsVerifiedAsAchieved[_getGoalAddress()][goalTokenId] = true;
         emit GoalVerifiedAsAchieved(goalTokenId);
     }
 
     function _setGoalVerifiedAsFailed(uint256 goalTokenId) internal {
+        _validateGoalIsNotVerified(goalTokenId);
         _goalsVerifiedAsFailed[_getGoalAddress()][goalTokenId] = true;
         emit GoalVerifiedAsFailed(goalTokenId);
     }
@@ -66,6 +68,13 @@ contract Verifier is IVerifier, Ownable {
 
     function _validateSenderIsGoalContract() internal view {
         if (msg.sender != _getGoalAddress()) revert Errors.NotGoalContract();
+    }
+
+    function _validateGoalIsNotVerified(uint256 goalTokenId) internal view {
+        if (
+            _goalsVerifiedAsAchieved[_getGoalAddress()][goalTokenId] ||
+            _goalsVerifiedAsFailed[_getGoalAddress()][goalTokenId]
+        ) revert Errors.GoalAlreadyVerified();
     }
 
     function _getGoalAddress() internal view returns (address goalAddress) {

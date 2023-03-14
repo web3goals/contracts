@@ -17,14 +17,8 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
     bytes32 private _jobId;
     uint256 private _fee;
     mapping(bytes32 => uint256) private _requestGoals;
-    string _gitHubUsernameKey = "GITHUB_USERNAME";
-    string _gitHubActivityDaysKey = "GITHUB_ACTIVITY_DAYS";
-
-    event GoalVerified(
-        bytes32 indexed requestId,
-        uint256 indexed goalTokenId,
-        bool isAchieved
-    );
+    string private _gitHubUsernameKey = "GITHUB_USERNAME";
+    string private _gitHubActivityDaysKey = "GITHUB_ACTIVITY_DAYS";
 
     constructor(
         address hubAddress,
@@ -84,11 +78,10 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
         bytes32 requestId,
         bool isSuccess
     ) public recordChainlinkFulfillment(requestId) {
-        emit GoalVerified(requestId, _requestGoals[requestId], isSuccess);
         if (isSuccess) {
-            _goalsVerifiedAsAchieved[_requestGoals[requestId]] = true;
+            _setGoalVerifiedAsAchieved(_requestGoals[requestId]);
         } else {
-            _goalsVerifiedAsFailed[_requestGoals[requestId]] = true;
+            _setGoalVerifiedAsNotAchievedYet(_requestGoals[requestId]);
         }
     }
 

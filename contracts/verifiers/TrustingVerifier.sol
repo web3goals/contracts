@@ -24,6 +24,6 @@ contract TrustingVerifier is Verifier {
             .getVerificationData(goalTokenId, _anyProofURIKey);
         if (Strings.equal(proofURI, "")) revert Errors.AnyProofURINotExists();
         // Update verification status
-        _goalsVerifiedAsAchieved[goalTokenId] = true;
+        _setGoalVerifiedAsAchieved(goalTokenId);
     }
 }

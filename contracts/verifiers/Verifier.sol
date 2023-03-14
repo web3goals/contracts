@@ -9,12 +9,20 @@ import "../interfaces/IVerifier.sol";
  */
 contract Verifier is IVerifier, Ownable {
     address internal _hubAddress;
-    mapping(uint256 => bool) internal _goalsVerifiedAsAchieved;
-    mapping(uint256 => bool) internal _goalsVerifiedAsFailed;
+    mapping(uint256 => bool) private _goalsVerifiedAsAchieved;
+    mapping(uint256 => bool) private _goalsVerifiedAsFailed;
+
+    event GoalVerifiedAsAchieved(uint256 indexed goalTokenId);
+    event GoalVerifiedAsFailed(uint256 indexed goalTokenId);
+    event GoalVerifiedAsNotAchievedYet(uint256 indexed goalTokenId);
 
     constructor(address hubAddress) {
         _hubAddress = hubAddress;
     }
+
+    /// ****************************
+    /// ***** PUBLIC FUNCTIONS *****
+    /// ****************************
 
     function verify(uint256 goalTokenId) public virtual {}
 
@@ -33,5 +41,23 @@ contract Verifier is IVerifier, Ownable {
 
     function setHubAddress(address hubAddress) public onlyOwner {
         _hubAddress = hubAddress;
+    }
+
+    /// ******************************
+    /// ***** INTERNAL FUNCTIONS *****
+    /// ******************************
+
+    function _setGoalVerifiedAsAchieved(uint256 goalTokenId) internal {
+        _goalsVerifiedAsAchieved[goalTokenId] = true;
+        emit GoalVerifiedAsAchieved(goalTokenId);
+    }
+
+    function _setGoalVerifiedAsFailed(uint256 goalTokenId) internal {
+        _goalsVerifiedAsFailed[goalTokenId] = true;
+        emit GoalVerifiedAsFailed(goalTokenId);
+    }
+
+    function _setGoalVerifiedAsNotAchievedYet(uint256 goalTokenId) internal {
+        emit GoalVerifiedAsNotAchievedYet(goalTokenId);
     }
 }

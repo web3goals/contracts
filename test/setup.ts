@@ -54,6 +54,13 @@ export const goalMotivatorExtraDataUris = {
   four: "ipfs://456",
 };
 
+export const goalMessageExtraDataUris = {
+  one: "ipfs://abc",
+  two: "ipfs://def",
+  three: "ipfs://123",
+  four: "ipfs://456",
+};
+
 export const profileUris = {
   one: "ipfs://abc",
   two: "ipfs://def",

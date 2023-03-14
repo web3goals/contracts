@@ -31,6 +31,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address indexed motivatorAccountAddress,
         DataTypes.GoalMotivator motivator
     );
+    event MessagePosted(uint256 indexed tokenId, DataTypes.GoalMessage message);
     event VerificationDataSet(
         uint256 indexed tokenId,
         string key,
@@ -153,11 +154,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress == msg.sender)
             revert Errors.AuthorCannotBeMotivator();
-        for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (_motivators[tokenId][i].accountAddress == msg.sender) {
-                revert Errors.AlreadyMotivator();
-            }
-        }
+        if (_isMotivator(tokenId, msg.sender)) revert Errors.AlreadyMotivator();
         // Add motivator
         DataTypes.GoalMotivator memory motivator = DataTypes.GoalMotivator(
             block.timestamp,
@@ -178,22 +175,43 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
-        // Check motivator
-        uint motivatorIndex = 2 ^ (256 - 1);
+        if (!_isMotivator(tokenId, motivatorAddress))
+            revert Errors.MotivatorNotFound();
+        if (_isAcceptedMotivator(tokenId, motivatorAddress))
+            revert Errors.AlreadyAccepted();
+        // Update motivator
         for (uint i = 0; i < _motivators[tokenId].length; i++) {
             if (_motivators[tokenId][i].accountAddress == motivatorAddress) {
-                motivatorIndex = i;
+                _motivators[tokenId][i].isAccepted = true;
+                emit MotivatorAccepted(
+                    tokenId,
+                    _motivators[tokenId][i].accountAddress,
+                    _motivators[tokenId][i]
+                );
+                return;
             }
         }
-        if (motivatorIndex == 2 ^ (256 - 1)) revert Errors.MotivatorNotFound();
-        DataTypes.GoalMotivator storage motivator = _motivators[tokenId][
-            motivatorIndex
-        ];
-        if (motivator.isAccepted) revert Errors.AlreadyAccepted();
-        // Update motivator
-        motivator.isAccepted = true;
-        // Emit events
-        emit MotivatorAccepted(tokenId, motivator.accountAddress, motivator);
+    }
+
+    function postMessage(
+        uint256 tokenId,
+        string memory extraDataURI
+    ) public whenNotPaused {
+        // Base Checks
+        if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (
+            _params[tokenId].authorAddress != msg.sender &&
+            !_isAcceptedMotivator(tokenId, msg.sender)
+        ) revert Errors.NotAuthorNotAcceptedMotivator();
+        // Emit event
+        DataTypes.GoalMessage memory message = DataTypes.GoalMessage(
+            block.timestamp,
+            msg.sender,
+            extraDataURI
+        );
+        emit MessagePosted(tokenId, message);
     }
 
     function addVerificationData(
@@ -366,6 +384,33 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (profileAddress == address(0))
             revert Errors.ProfileAddressNotExists();
         return IERC721Upgradeable(profileAddress).balanceOf(accountAddress) > 0;
+    }
+
+    function _isMotivator(
+        uint256 tokenId,
+        address accountAddress
+    ) internal view returns (bool) {
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (_motivators[tokenId][i].accountAddress == accountAddress) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function _isAcceptedMotivator(
+        uint256 tokenId,
+        address accountAddress
+    ) internal view returns (bool) {
+        for (uint i = 0; i < _motivators[tokenId].length; i++) {
+            if (
+                _motivators[tokenId][i].accountAddress == accountAddress &&
+                _motivators[tokenId][i].isAccepted == true
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function _getVerifierAddress(

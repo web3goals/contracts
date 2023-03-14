@@ -26,4 +26,10 @@ library DataTypes {
         uint motivatedGoals;
         uint notMotivatedGoals;
     }
+
+    struct GoalMessage {
+        uint addedTimestamp;
+        address authorAddress;
+        string extraDataURI;
+    }
 }

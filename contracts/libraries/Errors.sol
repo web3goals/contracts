@@ -19,6 +19,7 @@ library Errors {
     error AuthorCannotBeMotivator();
     error AlreadyMotivator();
     error NotAuthor();
+    error NotAuthorNotAcceptedMotivator();
     error NotAchieved();
     error MotivatorNotFound();
     error AlreadyAccepted();

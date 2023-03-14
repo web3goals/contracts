@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "./Verifier.sol";
 import "../libraries/Strings.sol";
-import "../interfaces/IHub.sol";
 import "../interfaces/IGoal.sol";
 import "../libraries/Errors.sol";
 
@@ -33,11 +32,10 @@ contract GitHubActivityVerifier is Verifier, ChainlinkClient {
     }
 
     function verify(uint256 goalTokenId) public override {
-        // Check sender
-        if (msg.sender != IHub(_hubAddress).getGoalAddress())
-            revert Errors.NotGoalContract();
+        // Validations
+        _validateSenderIsGoalContract();
         // Check verification data
-        IGoal goalContract = IGoal(IHub(_hubAddress).getGoalAddress());
+        IGoal goalContract = IGoal(_getGoalAddress());
         string memory gitHubUsername = goalContract.getVerificationData(
             goalTokenId,
             _gitHubUsernameKey

@@ -3,14 +3,17 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IVerifier.sol";
+import "../interfaces/IHub.sol";
+import "../libraries/Errors.sol";
 
 /**
  * Contract to verify a goal that shoul be extended.
  */
 contract Verifier is IVerifier, Ownable {
     address internal _hubAddress;
-    mapping(uint256 => bool) private _goalsVerifiedAsAchieved;
-    mapping(uint256 => bool) private _goalsVerifiedAsFailed;
+    mapping(address => mapping(uint256 => bool))
+        private _goalsVerifiedAsAchieved; // Key is goal contract address
+    mapping(address => mapping(uint256 => bool)) private _goalsVerifiedAsFailed; // Key is goal contract address
 
     event GoalVerifiedAsAchieved(uint256 indexed goalTokenId);
     event GoalVerifiedAsFailed(uint256 indexed goalTokenId);
@@ -30,8 +33,8 @@ contract Verifier is IVerifier, Ownable {
         uint256 goalTokenId
     ) public view returns (bool isAchieved, bool isFailed) {
         return (
-            _goalsVerifiedAsAchieved[goalTokenId],
-            _goalsVerifiedAsFailed[goalTokenId]
+            _goalsVerifiedAsAchieved[_getGoalAddress()][goalTokenId],
+            _goalsVerifiedAsFailed[_getGoalAddress()][goalTokenId]
         );
     }
 
@@ -48,16 +51,24 @@ contract Verifier is IVerifier, Ownable {
     /// ******************************
 
     function _setGoalVerifiedAsAchieved(uint256 goalTokenId) internal {
-        _goalsVerifiedAsAchieved[goalTokenId] = true;
+        _goalsVerifiedAsAchieved[_getGoalAddress()][goalTokenId] = true;
         emit GoalVerifiedAsAchieved(goalTokenId);
     }
 
     function _setGoalVerifiedAsFailed(uint256 goalTokenId) internal {
-        _goalsVerifiedAsFailed[goalTokenId] = true;
+        _goalsVerifiedAsFailed[_getGoalAddress()][goalTokenId] = true;
         emit GoalVerifiedAsFailed(goalTokenId);
     }
 
     function _setGoalVerifiedAsNotAchievedYet(uint256 goalTokenId) internal {
         emit GoalVerifiedAsNotAchievedYet(goalTokenId);
+    }
+
+    function _validateSenderIsGoalContract() internal view {
+        if (msg.sender != _getGoalAddress()) revert Errors.NotGoalContract();
+    }
+
+    function _getGoalAddress() internal view returns (address goalAddress) {
+        return IHub(_hubAddress).getGoalAddress();
     }
 }

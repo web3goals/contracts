@@ -20,24 +20,32 @@ import "./libraries/Constants.sol";
 contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     using Counters for Counters.Counter;
 
-    event ParamsSet(uint256 indexed tokenId, DataTypes.GoalParams params);
-    event MotivatorSet(
+    event Set(uint256 indexed tokenId, DataTypes.GoalParams params);
+    event MotivatorAdded(
         uint256 indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.GoalMotivator motivator
     );
-    event AccountReputationSet(
-        address indexed accountAddress,
-        DataTypes.AccountReputation accountReputation
+    event MotivatorAccepted(
+        uint256 indexed tokenId,
+        address indexed motivatorAccountAddress,
+        DataTypes.GoalMotivator motivator
     );
-    event AddedVerificationData(
+    event VerificationDataSet(
         uint256 indexed tokenId,
         string key,
         string value
     );
     event SentToVerifier(uint256 indexed tokenId);
-    event ClosedAsAchieved(uint256 indexed tokenId);
-    event ClosedAsFailed(uint256 indexed tokenId);
+    event ClosedAsAchieved(
+        uint256 indexed tokenId,
+        DataTypes.GoalParams params
+    );
+    event ClosedAsFailed(uint256 indexed tokenId, DataTypes.GoalParams params);
+    event AccountReputationSet(
+        address indexed accountAddress,
+        DataTypes.AccountReputation accountReputation
+    );
 
     address private _hubAddress;
     uint private _usageFeePercent;
@@ -123,7 +131,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             verificationRequirement
         );
         _params[newTokenId] = tokenParams;
-        emit ParamsSet(newTokenId, tokenParams);
+        emit Set(newTokenId, tokenParams);
         // Set verification data
         _addVerificationData(
             newTokenId,
@@ -157,7 +165,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             extraDataURI
         );
         _motivators[tokenId].push(motivator);
-        emit MotivatorSet(tokenId, motivator.accountAddress, motivator);
+        emit MotivatorAdded(tokenId, motivator.accountAddress, motivator);
     }
 
     function acceptMotivator(
@@ -184,7 +192,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update motivator
         motivator.isAccepted = true;
         // Emit events
-        emit MotivatorSet(tokenId, motivator.accountAddress, motivator);
+        emit MotivatorAccepted(tokenId, motivator.accountAddress, motivator);
     }
 
     function addVerificationData(
@@ -381,7 +389,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             _verificationData[tokenId][
                 verificationDataKeys[i]
             ] = verificationDataValues[i];
-            emit AddedVerificationData(
+            emit VerificationDataSet(
                 tokenId,
                 verificationDataKeys[i],
                 verificationDataValues[i]
@@ -401,8 +409,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = true;
-        emit ParamsSet(tokenId, _params[tokenId]);
-        emit ClosedAsAchieved(tokenId);
+        emit ClosedAsAchieved(tokenId, _params[tokenId]);
         // Update reputation for creator
         _accountReputations[_params[tokenId].authorAddress].achievedGoals++;
         emit AccountReputationSet(
@@ -431,8 +438,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
-        emit ParamsSet(tokenId, _params[tokenId]);
-        emit ClosedAsFailed(tokenId);
+        emit ClosedAsFailed(tokenId, _params[tokenId]);
         // Update reputation for creator
         _accountReputations[_params[tokenId].authorAddress].failedGoals++;
         emit AccountReputationSet(

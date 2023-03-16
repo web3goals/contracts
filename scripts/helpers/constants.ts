@@ -50,7 +50,7 @@ export const deployedContracts: {
     },
     profile: {
       name: "Profile",
-      version: "0.3",
+      version: "0.2",
       isUpgreadable: true,
       isInitializable: true,
       proxy: "0xA10fF24BE349475F539cc8E123251E31305d7Fe2",
@@ -62,7 +62,7 @@ export const deployedContracts: {
         verificationRequirement: "ANY_PROOF_URI",
         contract: {
           name: "TrustingVerifier",
-          version: "0.2.2",
+          version: "0.3",
           isUpgreadable: false,
           isInitializable: false,
           proxy: "0x5b93282ebD6d40BE5804B3d7679feCcb42e9D4bc",

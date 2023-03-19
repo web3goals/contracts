@@ -22,6 +22,7 @@ export async function deployWithLogs(args: {
       }
     );
     await contract.deployed();
+    console.log("✅ Contract deployed to " + contract.address);
   }
   // Deploy without proxy
   else {
@@ -34,6 +35,7 @@ export async function deployWithLogs(args: {
       contract = await args.contractFactory.deploy();
     }
     await contract.deployed();
+    console.log("✅ Contract deployed to " + contract.address);
     // Use initialize function
     if (args.isInitializeRequired) {
       if (args.contractInitializeArgs) {
@@ -41,9 +43,9 @@ export async function deployWithLogs(args: {
       } else {
         await contract.initialize();
       }
+      console.log("👌 Contract initialized");
     }
   }
-  console.log("✅ Contract deployed to " + contract.address);
   if (args.contractConstructorArgs) {
     console.log(
       "👉 Command for vefifying: " +

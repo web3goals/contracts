@@ -34,6 +34,11 @@ const config: HardhatUserConfig = {
       url: process.env.RPC_URL_HYPERSPACE || "",
       accounts: accounts,
     },
+    filecoin: {
+      chainId: 314,
+      url: process.env.RPC_URL_FILECOIN || "",
+      accounts: accounts,
+    },
   },
   etherscan: {
     apiKey: {

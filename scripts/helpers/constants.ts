@@ -118,6 +118,53 @@ export const deployedContracts: {
       },
     ],
   },
+  filecoin: {
+    hub: {
+      name: "Hub",
+      version: "0.3",
+      isUpgreadable: false,
+      isInitializable: true,
+      proxy: "0x2168609301437822c7AD3f35114B10941866F20a",
+      impl: "0x2168609301437822c7AD3f35114B10941866F20a",
+    },
+    goal: {
+      name: "Goal",
+      version: "0.3",
+      isUpgreadable: false,
+      isInitializable: true,
+      proxy: "0x96a5281959d962bA18481BEAfBe25C6c98316C95",
+      impl: "0x96a5281959d962bA18481BEAfBe25C6c98316C95",
+    },
+    keeper: {
+      name: "Keeper",
+      version: "0.3",
+      isUpgreadable: false,
+      isInitializable: true,
+      proxy: "0x02008a8dbc938bd7930bf370617065b6b0c1221a",
+      impl: "0x02008a8dbc938bd7930bf370617065b6b0c1221a",
+    },
+    profile: {
+      name: "Profile",
+      version: "0.3",
+      isUpgreadable: false,
+      isInitializable: true,
+      proxy: "0x9cAAb0Bf70BD0e71307BfaBeb1E8eC092c81e493",
+      impl: "0x9cAAb0Bf70BD0e71307BfaBeb1E8eC092c81e493",
+    },
+    verifiers: [
+      {
+        verificationRequirement: "ANY_PROOF_URI",
+        contract: {
+          name: "TrustingVerifier",
+          version: "0.3",
+          isUpgreadable: false,
+          isInitializable: false,
+          proxy: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
+          impl: "0xdfE15Cc65697c04C083982B8a053E2FE4cf54669",
+        },
+      },
+    ],
+  },
 };
 
 export const contractsData: {
@@ -133,4 +180,5 @@ export const contractsData: {
     },
   },
   hyperspace: { goalContract: { usagePercent: 10 } },
+  filecoin: { goalContract: { usagePercent: 10 } },
 };

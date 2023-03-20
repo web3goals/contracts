@@ -9,7 +9,7 @@ import "../libraries/Errors.sol";
 /**
  * Contract to verify a goal that shoul be extended.
  */
-contract Verifier is IVerifier, Ownable {
+abstract contract Verifier is IVerifier, Ownable {
     address internal _hubAddress;
     mapping(address => mapping(uint256 => bool))
         private _goalsVerifiedAsAchieved; // Key is goal contract address
@@ -27,7 +27,7 @@ contract Verifier is IVerifier, Ownable {
     /// ***** PUBLIC FUNCTIONS *****
     /// ****************************
 
-    function verify(uint256 goalTokenId) public virtual {}
+    function verify(uint256 goalTokenId) public virtual;
 
     function getVerificationStatus(
         uint256 goalTokenId

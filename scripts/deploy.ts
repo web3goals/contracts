@@ -29,6 +29,7 @@ async function main() {
   const chainContractsData = contractsData[chain];
   if (!chainContracts || !chainContractsData) {
     console.log("\n❌ Chain data or chain contracts data is undefined");
+    return;
   }
 
   // Deploy or upgrade hub contract

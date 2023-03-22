@@ -165,6 +165,57 @@ export const deployedContracts: {
       },
     ],
   },
+  mumbaiProduction: {
+    hub: {
+      name: "Hub",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x8BEcC725883CF49a9655a707A08E94211721093B",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x01f2b35AdE133A03cA34d7b614C91579D6d28583",
+    },
+    goal: {
+      name: "Goal",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x93d3a8C97E4F08fA709AaAfB65AbEDCcC00a2C83",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x8CbE15faeE3A8F6796506fCe15Ad6B1961E85191",
+    },
+    keeper: {
+      name: "Keeper",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x198C2E3A15f77c3eF976c2A8b419096b7A80b084",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x860c58c01b068E9A67633cb202Ebb614443f3F67",
+    },
+    profile: {
+      name: "Profile",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xD67EA1d21c374DfB6618F35B0e40426ac42cE557",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x244fD9faCC2c3A73745222Bb6862d4c0Bbb07b0D",
+    },
+    verifiers: [
+      {
+        verificationRequirement: "ANY_PROOF_URI",
+        contract: {
+          name: "TrustingVerifier",
+          version: "0.3",
+          isUpgreadable: false,
+          isInitializable: false,
+          proxy: "0xC74BA44fa161FAf37aDa76517bDF8a61119E98bb",
+          impl: "0xC74BA44fa161FAf37aDa76517bDF8a61119E98bb",
+        },
+      },
+    ],
+  },
 };
 
 export const contractsData: {
@@ -181,4 +232,5 @@ export const contractsData: {
   },
   hyperspace: { goalContract: { usagePercent: 10 } },
   filecoin: { goalContract: { usagePercent: 10 } },
+  mumbaiProduction: { goalContract: { usagePercent: 10 } },
 };

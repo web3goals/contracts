@@ -12,7 +12,14 @@ makeSuiteCleanRoom("Goal Ownering", function () {
     await expect(goalContract.connect(deployer).pause()).to.be.not.reverted;
     await expect(goalContract.connect(deployer).unpause()).to.be.not.reverted;
     await expect(
-      goalContract.connect(deployer).setHubAddress(ethers.constants.AddressZero)
+      goalContract
+        .connect(deployer)
+        .setProfileAddress(ethers.constants.AddressZero)
+    ).to.be.not.reverted;
+    await expect(
+      goalContract
+        .connect(deployer)
+        .setKeeperAddress(ethers.constants.AddressZero)
     ).to.be.not.reverted;
     await expect(
       goalContract.connect(deployer).setUsageFeePercent(0)
@@ -26,7 +33,14 @@ makeSuiteCleanRoom("Goal Ownering", function () {
     await expect(goalContract.connect(userOne).pause()).to.be.reverted;
     await expect(goalContract.connect(userOne).unpause()).to.be.reverted;
     await expect(
-      goalContract.connect(userOne).setHubAddress(ethers.constants.AddressZero)
+      goalContract
+        .connect(userOne)
+        .setProfileAddress(ethers.constants.AddressZero)
+    ).to.be.reverted;
+    await expect(
+      goalContract
+        .connect(userOne)
+        .setKeeperAddress(ethers.constants.AddressZero)
     ).to.be.reverted;
     await expect(
       goalContract.connect(userOne).setUsageFeePercent(0)

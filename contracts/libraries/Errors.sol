@@ -21,6 +21,7 @@ library Errors {
     error NotAuthor();
     error NotAuthorNotAcceptedMotivator();
     error NotAchieved();
+    error ProofsNotFound();
     error MotivatorNotFound();
     error AlreadyAccepted();
     error SendingStakeToAuthorFailed();

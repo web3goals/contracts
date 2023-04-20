@@ -21,9 +21,6 @@ makeSuiteCleanRoom("Goal Setting", function () {
           goalParams.one.description,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
-          goalParams.one.verificationRequirement,
-          goalParams.one.verificationDataKeys,
-          goalParams.one.verificationDataValues,
           {
             value: goalParams.one.stake,
           }
@@ -45,9 +42,6 @@ makeSuiteCleanRoom("Goal Setting", function () {
     expect(params.deadlineTimestamp).to.equal(goalParams.one.deadlineTimestamp);
     expect(params.isClosed).to.equal(false);
     expect(params.isAchieved).to.equal(false);
-    expect(params.verificationRequirement).to.equal(
-      goalParams.one.verificationRequirement
-    );
   });
 
   it("User should not be able to set a goal without profile", async function () {
@@ -58,13 +52,7 @@ makeSuiteCleanRoom("Goal Setting", function () {
         .set(
           goalParams.one.description,
           goalParams.one.stake,
-          goalParams.one.deadlineTimestamp,
-          goalParams.one.verificationRequirement,
-          goalParams.one.verificationDataKeys,
-          goalParams.one.verificationDataValues,
-          {
-            value: goalParams.one.stake,
-          }
+          goalParams.one.deadlineTimestamp
         )
     ).to.be.reverted;
   });

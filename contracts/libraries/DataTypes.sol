@@ -10,7 +10,11 @@ library DataTypes {
         uint deadlineTimestamp;
         bool isClosed;
         bool isAchieved;
-        string verificationRequirement;
+    }
+
+    struct GoalProof {
+        uint addedTimestamp;
+        string extraDataURI;
     }
 
     struct GoalMotivator {
@@ -20,16 +24,16 @@ library DataTypes {
         string extraDataURI;
     }
 
+    struct GoalMessage {
+        uint addedTimestamp;
+        address authorAddress;
+        string extraDataURI;
+    }
+
     struct GoalAccountReputation {
         uint achievedGoals;
         uint failedGoals;
         uint motivatedGoals;
         uint notMotivatedGoals;
-    }
-
-    struct GoalMessage {
-        uint addedTimestamp;
-        address authorAddress;
-        string extraDataURI;
     }
 }

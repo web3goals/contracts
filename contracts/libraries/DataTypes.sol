@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 library DataTypes {
-    struct GoalParams {
+    struct IndieGoalParams {
         uint createdTimestamp;
         string description;
         address authorAddress;
@@ -12,25 +12,25 @@ library DataTypes {
         bool isAchieved;
     }
 
-    struct GoalProof {
+    struct IndieGoalProof {
         uint addedTimestamp;
         string extraDataURI;
     }
 
-    struct GoalMotivator {
+    struct IndieGoalMotivator {
         uint addedTimestamp;
         address accountAddress;
         bool isAccepted;
         string extraDataURI;
     }
 
-    struct GoalMessage {
+    struct IndieGoalMessage {
         uint addedTimestamp;
         address authorAddress;
         string extraDataURI;
     }
 
-    struct GoalAccountReputation {
+    struct IndieGoalAccountReputation {
         uint achievedGoals;
         uint failedGoals;
         uint motivatedGoals;

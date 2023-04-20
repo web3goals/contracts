@@ -1,12 +1,12 @@
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import {
-  Goal,
-  Goal__factory,
-  Profile,
-  Profile__factory,
+  IndieGoal,
+  IndieGoal__factory,
   Keeper,
   Keeper__factory,
+  Profile,
+  Profile__factory,
 } from "../typechain-types";
 import { SECONDS_PER_DAY } from "./helpers/constants";
 import {
@@ -72,7 +72,7 @@ export let userFourAddress: string;
 
 export let profileContract: Profile;
 export let keeperContract: Keeper;
-export let goalContract: Goal;
+export let goalContract: IndieGoal;
 
 export function makeSuiteCleanRoom(name: string, tests: () => void) {
   return describe(name, () => {
@@ -118,7 +118,7 @@ before(async function () {
   await keeperContract.initialize();
 
   // Deploy goal contract
-  goalContract = await new Goal__factory(deployer).deploy();
+  goalContract = await new IndieGoal__factory(deployer).deploy();
   await goalContract.initialize(
     profileContract.address,
     keeperContract.address,

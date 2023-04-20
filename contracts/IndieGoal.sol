@@ -14,30 +14,40 @@ import "./libraries/Errors.sol";
 /**
  * A contract that stores goals that can be closed with unverified proofs.
  */
-contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
+contract IndieGoal is
+    ERC721Upgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
     using Counters for Counters.Counter;
 
-    event Set(uint256 indexed tokenId, DataTypes.GoalParams params);
-    event ProofPosted(uint256 indexed tokenId, DataTypes.GoalProof proof);
+    event Set(uint256 indexed tokenId, DataTypes.IndieGoalParams params);
+    event ProofPosted(uint256 indexed tokenId, DataTypes.IndieGoalProof proof);
     event MotivatorAdded(
         uint256 indexed tokenId,
         address indexed motivatorAccountAddress,
-        DataTypes.GoalMotivator motivator
+        DataTypes.IndieGoalMotivator motivator
     );
     event MotivatorAccepted(
         uint256 indexed tokenId,
         address indexed motivatorAccountAddress,
-        DataTypes.GoalMotivator motivator
+        DataTypes.IndieGoalMotivator motivator
     );
-    event MessagePosted(uint256 indexed tokenId, DataTypes.GoalMessage message);
+    event MessagePosted(
+        uint256 indexed tokenId,
+        DataTypes.IndieGoalMessage message
+    );
     event ClosedAsAchieved(
         uint256 indexed tokenId,
-        DataTypes.GoalParams params
+        DataTypes.IndieGoalParams params
     );
-    event ClosedAsFailed(uint256 indexed tokenId, DataTypes.GoalParams params);
+    event ClosedAsFailed(
+        uint256 indexed tokenId,
+        DataTypes.IndieGoalParams params
+    );
     event AccountReputationSet(
         address indexed accountAddress,
-        DataTypes.GoalAccountReputation accountReputation
+        DataTypes.IndieGoalAccountReputation accountReputation
     );
 
     address private _profileAddress;
@@ -45,10 +55,10 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
     uint private _usageFeePercent;
     string _imageSVG;
     Counters.Counter private _counter;
-    mapping(uint256 => DataTypes.GoalParams) private _params;
-    mapping(uint256 => DataTypes.GoalProof[]) private _proofs;
-    mapping(uint256 => DataTypes.GoalMotivator[]) private _motivators;
-    mapping(address => DataTypes.GoalAccountReputation)
+    mapping(uint256 => DataTypes.IndieGoalParams) private _params;
+    mapping(uint256 => DataTypes.IndieGoalProof[]) private _proofs;
+    mapping(uint256 => DataTypes.IndieGoalMotivator[]) private _motivators;
+    mapping(address => DataTypes.IndieGoalAccountReputation)
         private _accountReputations;
 
     function initialize(
@@ -56,7 +66,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         address keeperAddress,
         uint usageFeePercent
     ) public initializer {
-        __ERC721_init("Web3 Goals", "W3G");
+        __ERC721_init("Web3 Goals - Indie Goals", "W3GIG");
         __Ownable_init();
         __Pausable_init();
         _profileAddress = profileAddress;
@@ -114,15 +124,16 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         uint256 newTokenId = _counter.current();
         _mint(msg.sender, newTokenId);
         // Set params
-        DataTypes.GoalParams memory tokenParams = DataTypes.GoalParams(
-            block.timestamp,
-            description,
-            msg.sender,
-            stake,
-            deadlineTimestamp,
-            false,
-            false
-        );
+        DataTypes.IndieGoalParams memory tokenParams = DataTypes
+            .IndieGoalParams(
+                block.timestamp,
+                description,
+                msg.sender,
+                stake,
+                deadlineTimestamp,
+                false,
+                false
+            );
         _params[newTokenId] = tokenParams;
         emit Set(newTokenId, tokenParams);
         // Return
@@ -139,7 +150,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
         // Add proof
-        DataTypes.GoalProof memory proof = DataTypes.GoalProof(
+        DataTypes.IndieGoalProof memory proof = DataTypes.IndieGoalProof(
             block.timestamp,
             extraDataURI
         );
@@ -159,12 +170,13 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             revert Errors.AuthorCannotBeMotivator();
         if (_isMotivator(tokenId, msg.sender)) revert Errors.AlreadyMotivator();
         // Add motivator
-        DataTypes.GoalMotivator memory motivator = DataTypes.GoalMotivator(
-            block.timestamp,
-            msg.sender,
-            false,
-            extraDataURI
-        );
+        DataTypes.IndieGoalMotivator memory motivator = DataTypes
+            .IndieGoalMotivator(
+                block.timestamp,
+                msg.sender,
+                false,
+                extraDataURI
+            );
         _motivators[tokenId].push(motivator);
         emit MotivatorAdded(tokenId, motivator.accountAddress, motivator);
     }
@@ -209,7 +221,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
             !_isAcceptedMotivator(tokenId, msg.sender)
         ) revert Errors.NotAuthorNotAcceptedMotivator();
         // Emit event
-        DataTypes.GoalMessage memory message = DataTypes.GoalMessage(
+        DataTypes.IndieGoalMessage memory message = DataTypes.IndieGoalMessage(
             block.timestamp,
             msg.sender,
             extraDataURI
@@ -255,19 +267,19 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
 
     function getParams(
         uint256 tokenId
-    ) public view returns (DataTypes.GoalParams memory) {
+    ) public view returns (DataTypes.IndieGoalParams memory) {
         return _params[tokenId];
     }
 
     function getMotivators(
         uint256 tokenId
-    ) public view returns (DataTypes.GoalMotivator[] memory) {
+    ) public view returns (DataTypes.IndieGoalMotivator[] memory) {
         return _motivators[tokenId];
     }
 
     function getAccountReputation(
         address accountAddress
-    ) public view returns (DataTypes.GoalAccountReputation memory) {
+    ) public view returns (DataTypes.IndieGoalAccountReputation memory) {
         return _accountReputations[accountAddress];
     }
 
@@ -280,7 +292,7 @@ contract Goal is ERC721Upgradeable, OwnableUpgradeable, PausableUpgradeable {
                     "data:application/json;base64,",
                     Base64.encode(
                         abi.encodePacked(
-                            '{"name":"Web3 Goal #',
+                            '{"name":"Web3 Goals - Indie Goal #',
                             Strings.toString(tokenId),
                             '","image":"data:image/svg+xml;base64,',
                             Base64.encode(abi.encodePacked(_imageSVG)),

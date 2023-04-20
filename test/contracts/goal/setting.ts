@@ -21,6 +21,7 @@ makeSuiteCleanRoom("Goal Setting", function () {
           goalParams.one.description,
           goalParams.one.stake,
           goalParams.one.deadlineTimestamp,
+          goalParams.one.extraDataUri,
           {
             value: goalParams.one.stake,
           }
@@ -52,7 +53,8 @@ makeSuiteCleanRoom("Goal Setting", function () {
         .set(
           goalParams.one.description,
           goalParams.one.stake,
-          goalParams.one.deadlineTimestamp
+          goalParams.one.deadlineTimestamp,
+          goalParams.one.extraDataUri
         )
     ).to.be.reverted;
   });

@@ -10,6 +10,7 @@ library DataTypes {
         uint deadlineTimestamp;
         bool isClosed;
         bool isAchieved;
+        string extraDataURI;
     }
 
     struct IndieGoalProof {

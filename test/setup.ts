@@ -33,6 +33,7 @@ export const goalParams = {
     stake: BigNumber.from("50000000000000000"),
     stakeForKeeper: BigNumber.from("5000000000000000"),
     stakeForMotivators: BigNumber.from("45000000000000000"),
+    extraDataUri: "ipfs://abc",
   },
 };
 

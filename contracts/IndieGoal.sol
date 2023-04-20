@@ -110,7 +110,8 @@ contract IndieGoal is
     function set(
         string memory description,
         uint stake,
-        uint deadlineTimestamp
+        uint deadlineTimestamp,
+        string memory extraDataURI
     ) public payable whenNotPaused returns (uint256) {
         // Base checks
         if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
@@ -132,7 +133,8 @@ contract IndieGoal is
                 stake,
                 deadlineTimestamp,
                 false,
-                false
+                false,
+                extraDataURI
             );
         _params[newTokenId] = tokenParams;
         emit Set(newTokenId, tokenParams);

@@ -23,6 +23,7 @@ makeSuiteCleanRoom("Goal Transfering", function () {
         goalParams.one.description,
         goalParams.one.stake,
         goalParams.one.deadlineTimestamp,
+        goalParams.one.extraDataUri,
         {
           value: goalParams.one.stake,
         }

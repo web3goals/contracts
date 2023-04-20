@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * Contract to receive usage fee from the goal contract.
+ * A contract that holds funds received from other contracts.
  */
 contract Keeper is OwnableUpgradeable {
     event Received(address sender, uint value);

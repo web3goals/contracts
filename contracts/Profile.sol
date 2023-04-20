@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./libraries/Errors.sol";
 
 /**
- * Contract to store accounts profile data.
+ * A contract that stores profiles.
  */
 contract Profile is ERC721URIStorageUpgradeable {
     using Counters for Counters.Counter;

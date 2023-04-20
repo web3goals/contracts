@@ -5,9 +5,9 @@ import {
   Goal__factory,
   Profile,
   Profile__factory,
+  Keeper,
+  Keeper__factory,
 } from "../typechain-types";
-import { Keeper } from "../typechain-types/contracts";
-import { Keeper__factory } from "../typechain-types/factories/contracts";
 import { SECONDS_PER_DAY } from "./helpers/constants";
 import {
   getEpochSeconds,

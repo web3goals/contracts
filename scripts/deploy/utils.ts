@@ -23,6 +23,7 @@ export async function deployWithLogs(args: {
     );
     await contract.deployed();
     console.log("✅ Contract deployed to " + contract.address);
+    console.log("⚠️ Do not forget update contracts that use this contract");
   }
   // Deploy without proxy
   else {
@@ -36,6 +37,7 @@ export async function deployWithLogs(args: {
     }
     await contract.deployed();
     console.log("✅ Contract deployed to " + contract.address);
+    console.log("⚠️ Do not forget update contracts that use this contract");
     // Use initialize function
     if (args.isInitializeRequired) {
       if (args.contractInitializeArgs) {

@@ -8,7 +8,45 @@ interface DeployedContract {
   impl?: string;
 }
 
-export const deployedContracts: {
+export const contracts: {
+  [key: string]: {
+    profile: DeployedContract;
+    keeper: DeployedContract;
+    indieGoal: DeployedContract;
+  };
+} = {
+  mumbai: {
+    profile: {
+      name: "Profile",
+      version: "0.2",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xA10fF24BE349475F539cc8E123251E31305d7Fe2",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x244fD9faCC2c3A73745222Bb6862d4c0Bbb07b0D",
+    },
+    keeper: {
+      name: "Keeper",
+      version: "0.2",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x3FcF65dFD7Bb2Fd8D81235aa04ad0E7f75110386",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x860c58c01b068E9A67633cb202Ebb614443f3F67",
+    },
+    indieGoal: {
+      name: "Indie Goal",
+      version: "0.4-preview",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xdA7cCE9ed38695589436735A40011Cc4C91532ef",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0xA7eB49e30F3Fdb99d7Ef45233B7c541F6f4FF233",
+    },
+  },
+};
+
+export const obsoleteContracts: {
   [key: string]: {
     hub: DeployedContract;
     goal: DeployedContract;
@@ -216,21 +254,4 @@ export const deployedContracts: {
       },
     ],
   },
-};
-
-export const contractsData: {
-  [key: string]: {
-    goalContract: {
-      usagePercent: number;
-    };
-  };
-} = {
-  mumbai: {
-    goalContract: {
-      usagePercent: 10,
-    },
-  },
-  hyperspace: { goalContract: { usagePercent: 10 } },
-  filecoin: { goalContract: { usagePercent: 10 } },
-  mumbaiProduction: { goalContract: { usagePercent: 10 } },
 };

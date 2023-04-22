@@ -12,13 +12,12 @@ library Errors {
     error StakeInvalid();
     error DeadlineMustBeAtLeast24HoursLater();
     error GoalClosed();
-    error AuthorCannotBeMotivator();
-    error AlreadyMotivator();
     error NotAuthor();
-    error NotAuthorNotAcceptedMotivator();
     error ProofsNotFound();
-    error MotivatorNotFound();
-    error AlreadyAccepted();
+    error MessageNotExists();
+    error EvaluationIncorrect();
+    error AuthorCannotEvaluateOwnMessage();
+    error MessageAlreadyEvaluated();
     error SendingStakeToAuthorFailed();
     error SendingStakeToKeeperFailed();
     error SendingStakeToMotivatorFailed();

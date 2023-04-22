@@ -1,3 +1,6 @@
 export const ERRORS = {
-  notAuthorNotAcceptedMotivator: "NotAuthorNotAcceptedMotivator",
+  notAuthor: "NotAuthor",
+  authorCannotEvaluateOwnMessage: "AuthorCannotEvaluateOwnMessage",
+  messageNotExists: "MessageNotExists",
+  messageAlreadyEvaluated: "MessageAlreadyEvaluated",
 };

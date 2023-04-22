@@ -28,13 +28,19 @@ contract IndieGoal is
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
-    event MotivatorAccepted(
+    event MotivatorUpdated(
         uint256 indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
     event MessagePosted(
         uint256 indexed tokenId,
+        uint256 indexed messageId,
+        DataTypes.IndieGoalMessage message
+    );
+    event MessageEvaluated(
+        uint256 indexed tokenId,
+        uint256 indexed messageId,
         DataTypes.IndieGoalMessage message
     );
     event ClosedAsAchieved(
@@ -45,10 +51,6 @@ contract IndieGoal is
         uint256 indexed tokenId,
         DataTypes.IndieGoalParams params
     );
-    event AccountReputationSet(
-        address indexed accountAddress,
-        DataTypes.IndieGoalAccountReputation accountReputation
-    );
 
     address private _profileAddress;
     address private _keeperAddress;
@@ -58,8 +60,7 @@ contract IndieGoal is
     mapping(uint256 => DataTypes.IndieGoalParams) private _params;
     mapping(uint256 => DataTypes.IndieGoalProof[]) private _proofs;
     mapping(uint256 => DataTypes.IndieGoalMotivator[]) private _motivators;
-    mapping(address => DataTypes.IndieGoalAccountReputation)
-        private _accountReputations;
+    mapping(uint256 => DataTypes.IndieGoalMessage[]) private _messages;
 
     function initialize(
         address profileAddress,
@@ -113,7 +114,7 @@ contract IndieGoal is
         uint deadlineTimestamp,
         string memory extraDataURI
     ) public payable whenNotPaused returns (uint256) {
-        // Base checks
+        // Check data
         if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
         if (msg.value != stake) revert Errors.MessageValueMismatch();
         if (stake <= 0) revert Errors.StakeInvalid();
@@ -146,7 +147,7 @@ contract IndieGoal is
         uint256 tokenId,
         string memory extraDataURI
     ) public whenNotPaused {
-        // Base checks
+        // Check data
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         if (_params[tokenId].authorAddress != msg.sender)
@@ -160,79 +161,70 @@ contract IndieGoal is
         emit ProofPosted(tokenId, proof);
     }
 
-    function becomeMotivator(
-        uint256 tokenId,
-        string memory extraDataURI
-    ) public whenNotPaused {
-        // Base checks
-        if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
-        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
-        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
-        if (_params[tokenId].authorAddress == msg.sender)
-            revert Errors.AuthorCannotBeMotivator();
-        if (_isMotivator(tokenId, msg.sender)) revert Errors.AlreadyMotivator();
-        // Add motivator
-        DataTypes.IndieGoalMotivator memory motivator = DataTypes
-            .IndieGoalMotivator(
-                block.timestamp,
-                msg.sender,
-                false,
-                extraDataURI
-            );
-        _motivators[tokenId].push(motivator);
-        emit MotivatorAdded(tokenId, motivator.accountAddress, motivator);
-    }
-
-    function acceptMotivator(
-        uint256 tokenId,
-        address motivatorAddress
-    ) public whenNotPaused {
-        // Base checks
-        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
-        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
-        if (_params[tokenId].authorAddress != msg.sender)
-            revert Errors.NotAuthor();
-        if (!_isMotivator(tokenId, motivatorAddress))
-            revert Errors.MotivatorNotFound();
-        if (_isAcceptedMotivator(tokenId, motivatorAddress))
-            revert Errors.AlreadyAccepted();
-        // Update motivator
-        for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (_motivators[tokenId][i].accountAddress == motivatorAddress) {
-                _motivators[tokenId][i].isAccepted = true;
-                emit MotivatorAccepted(
-                    tokenId,
-                    _motivators[tokenId][i].accountAddress,
-                    _motivators[tokenId][i]
-                );
-                return;
-            }
-        }
-    }
-
     function postMessage(
         uint256 tokenId,
         string memory extraDataURI
     ) public whenNotPaused {
-        // Base checks
+        // Check data
         if (!_isHasProfile(msg.sender)) revert Errors.ProfileNotExists();
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
-        if (
-            _params[tokenId].authorAddress != msg.sender &&
-            !_isAcceptedMotivator(tokenId, msg.sender)
-        ) revert Errors.NotAuthorNotAcceptedMotivator();
-        // Emit event
+        // Add message
         DataTypes.IndieGoalMessage memory message = DataTypes.IndieGoalMessage(
             block.timestamp,
             msg.sender,
+            false,
+            false,
             extraDataURI
         );
-        emit MessagePosted(tokenId, message);
+        _messages[tokenId].push(message);
+        emit MessagePosted(tokenId, _messages[tokenId].length - 1, message);
+        // Add motivator
+        _addMotivator(tokenId, msg.sender);
+    }
+
+    function evaluateMessage(
+        uint256 tokenId,
+        uint256 messageId,
+        bool isMotivating,
+        bool isSuperMotivating
+    ) public whenNotPaused {
+        // Check data
+        if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
+        if (_params[tokenId].isClosed) revert Errors.GoalClosed();
+        if (_params[tokenId].authorAddress != msg.sender)
+            revert Errors.NotAuthor();
+        if (
+            (isMotivating && isSuperMotivating) ||
+            (!isMotivating && !isSuperMotivating)
+        ) revert Errors.EvaluationIncorrect();
+        if (_messages[tokenId].length - 1 < messageId)
+            revert Errors.MessageNotExists();
+        if (_messages[tokenId][messageId].authorAddress == msg.sender)
+            revert Errors.AuthorCannotEvaluateOwnMessage();
+        if (
+            _messages[tokenId][messageId].isMotivating ||
+            _messages[tokenId][messageId].isSuperMotivating
+        ) revert Errors.MessageAlreadyEvaluated();
+        // Update message
+        _messages[tokenId][messageId].isMotivating = isMotivating;
+        _messages[tokenId][messageId].isSuperMotivating = isSuperMotivating;
+        emit MessageEvaluated(
+            tokenId,
+            messageId,
+            _messages[tokenId][messageId]
+        );
+        // Update motivator
+        _updateMotivator(
+            tokenId,
+            _messages[tokenId][messageId].authorAddress,
+            isMotivating ? 1 : 0,
+            isSuperMotivating ? 1 : 0
+        );
     }
 
     function close(uint256 tokenId) public whenNotPaused {
-        // Base checks
+        // Check data
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         // Close
@@ -279,10 +271,54 @@ contract IndieGoal is
         return _motivators[tokenId];
     }
 
-    function getAccountReputation(
+    function getMessages(
+        uint256 tokenId
+    ) public view returns (DataTypes.IndieGoalMessage[] memory) {
+        return _messages[tokenId];
+    }
+
+    function getReputation(
         address accountAddress
-    ) public view returns (DataTypes.IndieGoalAccountReputation memory) {
-        return _accountReputations[accountAddress];
+    ) public view returns (uint, uint, uint) {
+        uint goals;
+        uint achievedGoals;
+        uint failedGoals;
+        for (uint i = 1; i <= _counter.current(); i++) {
+            if (_params[i].authorAddress == accountAddress) {
+                goals++;
+            }
+            if (
+                _params[i].authorAddress == accountAddress &&
+                _params[i].isClosed &&
+                _params[i].isAchieved
+            ) {
+                achievedGoals++;
+            }
+            if (
+                _params[i].authorAddress == accountAddress &&
+                _params[i].isClosed &&
+                !_params[i].isAchieved
+            ) {
+                failedGoals++;
+            }
+        }
+        return (goals, achievedGoals, failedGoals);
+    }
+
+    function getMotivatorReputation(
+        address accountAddress
+    ) public view returns (uint, uint) {
+        uint motivations;
+        uint superMotivations;
+        for (uint i = 1; i <= _counter.current(); i++) {
+            for (uint j = 0; j < _motivators[i].length; j++) {
+                if (_motivators[i][j].accountAddress == accountAddress) {
+                    motivations += _motivators[i][j].motivations;
+                    superMotivations += _motivators[i][j].superMotivations;
+                }
+            }
+        }
+        return (motivations, superMotivations);
     }
 
     function tokenURI(
@@ -334,60 +370,57 @@ contract IndieGoal is
             IERC721Upgradeable(_profileAddress).balanceOf(accountAddress) > 0;
     }
 
-    function _isMotivator(
-        uint256 tokenId,
-        address accountAddress
-    ) internal view returns (bool) {
+    function _addMotivator(uint256 tokenId, address accountAddress) internal {
+        // Check if author
+        if (_params[tokenId].authorAddress == accountAddress) return;
+        // Check if already exists
         for (uint i = 0; i < _motivators[tokenId].length; i++) {
             if (_motivators[tokenId][i].accountAddress == accountAddress) {
-                return true;
+                return;
             }
         }
-        return false;
+        // Add motivator
+        DataTypes.IndieGoalMotivator memory motivator = DataTypes
+            .IndieGoalMotivator(msg.sender, 0, 0);
+        _motivators[tokenId].push(motivator);
+        emit MotivatorAdded(tokenId, accountAddress, motivator);
     }
 
-    function _isAcceptedMotivator(
+    function _updateMotivator(
         uint256 tokenId,
-        address accountAddress
-    ) internal view returns (bool) {
+        address accountAddress,
+        uint additionalMotivations,
+        uint additionalSuperMotivations
+    ) internal {
         for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (
-                _motivators[tokenId][i].accountAddress == accountAddress &&
-                _motivators[tokenId][i].isAccepted == true
-            ) {
-                return true;
+            if (_motivators[tokenId][i].accountAddress == accountAddress) {
+                _motivators[tokenId][i].motivations += additionalMotivations;
+                _motivators[tokenId][i]
+                    .superMotivations += additionalSuperMotivations;
+                emit MotivatorUpdated(
+                    tokenId,
+                    accountAddress,
+                    _motivators[tokenId][i]
+                );
             }
         }
-        return false;
+    }
+
+    function _getMotivatorPoints(
+        DataTypes.IndieGoalMotivator memory motivator
+    ) internal pure returns (uint) {
+        return 1 * motivator.motivations + 3 * motivator.superMotivations;
     }
 
     function _closeAsAchievedBeforeDeadline(uint256 tokenId) internal {
-        // Check author
+        // Check data
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
-        // Check proofs
         if (_proofs[tokenId].length == 0) revert Errors.ProofsNotFound();
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = true;
         emit ClosedAsAchieved(tokenId, _params[tokenId]);
-        // Update reputation for creator
-        _accountReputations[_params[tokenId].authorAddress].achievedGoals++;
-        emit AccountReputationSet(
-            _params[tokenId].authorAddress,
-            _accountReputations[_params[tokenId].authorAddress]
-        );
-        // Update reputation for accepted motivators
-        for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (_motivators[tokenId][i].isAccepted) {
-                _accountReputations[_motivators[tokenId][i].accountAddress]
-                    .motivatedGoals++;
-                emit AccountReputationSet(
-                    _motivators[tokenId][i].accountAddress,
-                    _accountReputations[_motivators[tokenId][i].accountAddress]
-                );
-            }
-        }
         // Return stake
         (bool sent, ) = _params[tokenId].authorAddress.call{
             value: _params[tokenId].authorStake
@@ -400,38 +433,21 @@ contract IndieGoal is
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
         emit ClosedAsFailed(tokenId, _params[tokenId]);
-        // Update reputation for creator
-        _accountReputations[_params[tokenId].authorAddress].failedGoals++;
-        emit AccountReputationSet(
-            _params[tokenId].authorAddress,
-            _accountReputations[_params[tokenId].authorAddress]
-        );
-        // Update reputation for accepted motivators
+        // Calculate total motivator points
+        uint totalMotivatorPoints;
         for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (_motivators[tokenId][i].isAccepted) {
-                _accountReputations[_motivators[tokenId][i].accountAddress]
-                    .notMotivatedGoals++;
-                emit AccountReputationSet(
-                    _motivators[tokenId][i].accountAddress,
-                    _accountReputations[_motivators[tokenId][i].accountAddress]
-                );
-            }
+            totalMotivatorPoints += _getMotivatorPoints(
+                _motivators[tokenId][i]
+            );
         }
-        // Define number of accepted motivators
-        uint acceptedMotivatorNumber = 0;
-        for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            if (_motivators[tokenId][i].isAccepted) {
-                acceptedMotivatorNumber++;
-            }
-        }
-        // If there are no accepted motivators, then send stake to keeper
-        if (acceptedMotivatorNumber == 0) {
+        // If there are no motivators with points, then send stake to keeper
+        if (totalMotivatorPoints == 0) {
             (bool sentToKepper, ) = _keeperAddress.call{
                 value: _params[tokenId].authorStake
             }("");
             if (!sentToKepper) revert Errors.SendingStakeToKeeperFailed();
         }
-        // If accepted motivators exist, then send part of stake to them and part to keeper
+        // If motivators with points exist, then send part of stake to them and part to keeper
         else {
             // Send stake to keeper
             uint stakeForKeeper = (_params[tokenId].authorStake *
@@ -444,15 +460,14 @@ contract IndieGoal is
             uint stakeForMotivators = _params[tokenId].authorStake -
                 stakeForKeeper;
             for (uint i = 0; i < _motivators[tokenId].length; i++) {
-                if (_motivators[tokenId][i].isAccepted) {
-                    (bool sentToMotivator, ) = _motivators[tokenId][i]
-                        .accountAddress
-                        .call{
-                        value: stakeForMotivators / acceptedMotivatorNumber
-                    }("");
-                    if (!sentToMotivator)
-                        revert Errors.SendingStakeToMotivatorFailed();
-                }
+                uint stakeForMotivator = (_getMotivatorPoints(
+                    _motivators[tokenId][i]
+                ) * stakeForMotivators) / totalMotivatorPoints;
+                (bool sentToMotivator, ) = _motivators[tokenId][i]
+                    .accountAddress
+                    .call{value: stakeForMotivator}("");
+                if (!sentToMotivator)
+                    revert Errors.SendingStakeToMotivatorFailed();
             }
         }
     }

@@ -6,18 +6,16 @@ import { SECONDS_PER_DAY } from "../../helpers/constants";
 import {
   createProfiles,
   goalContract,
+  goalMessageExtraDataUris,
   goalParams,
-  goalMotivatorExtraDataUris,
+  goalProofExtraDataUris,
   keeperContract,
   makeSuiteCleanRoom,
   userFour,
-  userFourAddress,
   userOne,
   userOneAddress,
   userThree,
   userTwo,
-  userTwoAddress,
-  goalProofExtraDataUris,
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Closing", function () {
@@ -57,7 +55,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     await goalContract
       .connect(userOne)
       .postProof(goalWithProofs, goalProofExtraDataUris.one);
-    // Set goal, post proof, add and accept motivators by user one
+    // Set goal, post proof, add messages from motivators and evaluate them by user one
     await goalContract
       .connect(userOne)
       .set(
@@ -77,28 +75,19 @@ makeSuiteCleanRoom("Goal Closing", function () {
       .postProof(goalWithProofsAndMotivators, goalProofExtraDataUris.one);
     await goalContract
       .connect(userTwo)
-      .becomeMotivator(
-        goalWithProofsAndMotivators,
-        goalMotivatorExtraDataUris.two
-      );
+      .postMessage(goalWithProofsAndMotivators, goalMessageExtraDataUris.two);
     await goalContract
       .connect(userThree)
-      .becomeMotivator(
-        goalWithProofsAndMotivators,
-        goalMotivatorExtraDataUris.three
-      );
+      .postMessage(goalWithProofsAndMotivators, goalMessageExtraDataUris.three);
     await goalContract
       .connect(userFour)
-      .becomeMotivator(
-        goalWithProofsAndMotivators,
-        goalMotivatorExtraDataUris.four
-      );
+      .postMessage(goalWithProofsAndMotivators, goalMessageExtraDataUris.four);
     await goalContract
       .connect(userOne)
-      .acceptMotivator(goalWithProofsAndMotivators, userTwoAddress);
+      .evaluateMessage(goalWithProofsAndMotivators, 0, true, false);
     await goalContract
       .connect(userOne)
-      .acceptMotivator(goalWithProofsAndMotivators, userFourAddress);
+      .evaluateMessage(goalWithProofsAndMotivators, 2, false, true);
   });
 
   it("Goal author should be able to close a goal with proofs before deadline and return stake", async function () {
@@ -116,10 +105,11 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(goalWithProofs);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
-    // Check account reputation
-    expect(
-      (await goalContract.getAccountReputation(userOneAddress)).achievedGoals
-    ).to.equal(1);
+    // Check reputation
+    const reputation = await goalContract.getReputation(userOneAddress);
+    expect(reputation[0]).to.equal(3);
+    expect(reputation[1]).to.equal(1);
+    expect(reputation[2]).to.equal(0);
   });
 
   it("Goal author should be able to close a goal with proofs and motivators before deadline and return stake", async function () {
@@ -137,16 +127,11 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(goalWithProofsAndMotivators);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(true);
-    // Check account reputation
-    expect(
-      (await goalContract.getAccountReputation(userOneAddress)).achievedGoals
-    ).to.equal(1);
-    expect(
-      (await goalContract.getAccountReputation(userTwoAddress)).motivatedGoals
-    ).to.equal(1);
-    expect(
-      (await goalContract.getAccountReputation(userFourAddress)).motivatedGoals
-    ).to.equal(1);
+    // Check reputation
+    const reputation = await goalContract.getReputation(userOneAddress);
+    expect(reputation[0]).to.equal(3);
+    expect(reputation[1]).to.equal(1);
+    expect(reputation[2]).to.equal(0);
   });
 
   it("Goal author should not be able to close a goal without proofs before deadline", async function () {
@@ -179,23 +164,33 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(goalWithProofs);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
-    // Check account reputation
-    expect(
-      (await goalContract.getAccountReputation(userOneAddress)).failedGoals
-    ).to.equal(1);
+    // Check reputation
+    const reputation = await goalContract.getReputation(userOneAddress);
+    expect(reputation[0]).to.equal(3);
+    expect(reputation[1]).to.equal(0);
+    expect(reputation[2]).to.equal(1);
   });
 
-  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to keeper and accepted motivators", async function () {
+  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to keeper and motivators", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
       goalContract.connect(userTwo).close(goalWithProofsAndMotivators)
     ).to.changeEtherBalances(
-      [userTwo, userFour, keeperContract.address, goalContract.address],
       [
-        goalParams.one.stakeForMotivators.div(BigNumber.from("2")),
-        goalParams.one.stakeForMotivators.div(BigNumber.from("2")),
+        userTwo,
+        userThree,
+        userFour,
+        keeperContract.address,
+        goalContract.address,
+      ],
+      [
+        goalParams.one.stakeForMotivators.div(BigNumber.from("4")),
+        ethers.constants.Zero,
+        goalParams.one.stakeForMotivators
+          .div(BigNumber.from("4"))
+          .mul(BigNumber.from("3")),
         goalParams.one.stakeForKeeper,
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
       ]
@@ -204,17 +199,10 @@ makeSuiteCleanRoom("Goal Closing", function () {
     const params = await goalContract.getParams(goalWithProofsAndMotivators);
     expect(params.isClosed).to.equal(true);
     expect(params.isAchieved).to.equal(false);
-    // Check accounts reputation
-    expect(
-      (await goalContract.getAccountReputation(userOneAddress)).failedGoals
-    ).to.equal(1);
-    expect(
-      (await goalContract.getAccountReputation(userTwoAddress))
-        .notMotivatedGoals
-    ).to.equal(1);
-    expect(
-      (await goalContract.getAccountReputation(userFourAddress))
-        .notMotivatedGoals
-    ).to.equal(1);
+    // Check reputation
+    const reputation = await goalContract.getReputation(userOneAddress);
+    expect(reputation[0]).to.equal(3);
+    expect(reputation[1]).to.equal(0);
+    expect(reputation[2]).to.equal(1);
   });
 });

@@ -1,27 +1,27 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { ERRORS } from "../../helpers/errors";
 import { EVENTS } from "../../helpers/events";
 import {
   createProfiles,
   goalContract,
   goalMessageExtraDataUris,
-  goalMotivatorExtraDataUris,
   goalParams,
   makeSuiteCleanRoom,
   userOne,
+  userOneAddress,
   userThree,
+  userThreeAddress,
   userTwo,
   userTwoAddress,
 } from "../../setup";
 
-makeSuiteCleanRoom("Goal Accepting Motivator", function () {
+makeSuiteCleanRoom("Goal Messaging", function () {
   let goal: BigNumber;
 
   beforeEach(async function () {
     // Create profiles
     await createProfiles();
-    // Set goal, add and accept motivators by user one
+    // Set goal
     await goalContract
       .connect(userOne)
       .set(
@@ -34,39 +34,48 @@ makeSuiteCleanRoom("Goal Accepting Motivator", function () {
         }
       );
     goal = await goalContract.connect(userOne).getCurrentCounter();
-    await goalContract
-      .connect(userTwo)
-      .becomeMotivator(goal, goalMotivatorExtraDataUris.two);
-    await goalContract
-      .connect(userThree)
-      .becomeMotivator(goal, goalMotivatorExtraDataUris.three);
-    await goalContract.connect(userOne).acceptMotivator(goal, userTwoAddress);
   });
 
   it("Goal author should be able to post a message", async function () {
+    // Post message
     await expect(
       goalContract
         .connect(userOne)
         .postMessage(goal, goalMessageExtraDataUris.one)
     ).to.emit(goalContract, EVENTS.messagePosted);
+    // Check messages
+    const messages = await goalContract.getMessages(goal);
+    expect(messages.length).to.equal(1);
+    expect(messages[0].authorAddress).to.equal(userOneAddress);
+    expect(messages[0].extraDataURI).to.equal(goalMessageExtraDataUris.one);
+    // Check motivators
+    const motivators = await goalContract.getMotivators(goal);
+    expect(motivators.length).to.equal(0);
   });
 
-  it("Accepted motivator should be able to post a message", async function () {
+  it("Not goal authors should be able to post a message", async function () {
+    // Post messages
     await expect(
       goalContract
         .connect(userTwo)
         .postMessage(goal, goalMessageExtraDataUris.two)
     ).to.emit(goalContract, EVENTS.messagePosted);
-  });
-
-  it("Not accepted motivator should not be able to post a message", async function () {
     await expect(
       goalContract
         .connect(userThree)
         .postMessage(goal, goalMessageExtraDataUris.three)
-    ).to.be.revertedWithCustomError(
-      goalContract,
-      ERRORS.notAuthorNotAcceptedMotivator
-    );
+    ).to.emit(goalContract, EVENTS.messagePosted);
+    // Check messages
+    const messages = await goalContract.getMessages(goal);
+    expect(messages.length).to.equal(2);
+    expect(messages[0].authorAddress).to.equal(userTwoAddress);
+    expect(messages[0].extraDataURI).to.equal(goalMessageExtraDataUris.two);
+    expect(messages[1].authorAddress).to.equal(userThreeAddress);
+    expect(messages[1].extraDataURI).to.equal(goalMessageExtraDataUris.three);
+    // Check motivators
+    const motivators = await goalContract.getMotivators(goal);
+    expect(motivators.length).to.equal(2);
+    expect(motivators[0].accountAddress).to.equal(userTwoAddress);
+    expect(motivators[1].accountAddress).to.equal(userThreeAddress);
   });
 });

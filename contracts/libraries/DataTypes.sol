@@ -19,22 +19,16 @@ library DataTypes {
     }
 
     struct IndieGoalMotivator {
-        uint addedTimestamp;
         address accountAddress;
-        bool isAccepted;
-        string extraDataURI;
+        uint motivations;
+        uint superMotivations;
     }
 
     struct IndieGoalMessage {
         uint addedTimestamp;
         address authorAddress;
+        bool isMotivating;
+        bool isSuperMotivating;
         string extraDataURI;
-    }
-
-    struct IndieGoalAccountReputation {
-        uint achievedGoals;
-        uint failedGoals;
-        uint motivatedGoals;
-        uint notMotivatedGoals;
     }
 }

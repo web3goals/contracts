@@ -41,7 +41,7 @@ export const contracts: {
       isInitializable: true,
       proxy: "0xdA7cCE9ed38695589436735A40011Cc4C91532ef",
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
-      impl: "0xA7eB49e30F3Fdb99d7Ef45233B7c541F6f4FF233",
+      impl: "0xF6Aee0B41Bdc6A4A43B194366F7c2E46b30D9eFd",
     },
   },
 };

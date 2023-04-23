@@ -291,6 +291,12 @@ contract IndieGoal is
         return _params[tokenId];
     }
 
+    function getProofs(
+        uint256 tokenId
+    ) public view returns (DataTypes.IndieGoalProof[] memory) {
+        return _proofs[tokenId];
+    }
+
     function getMotivators(
         uint256 tokenId
     ) public view returns (DataTypes.IndieGoalMotivator[] memory) {

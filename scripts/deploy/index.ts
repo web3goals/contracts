@@ -40,6 +40,7 @@ async function main() {
       isInitializeRequired: chainContracts.profile.isInitializable,
     });
     chainContracts.profile.proxy = contract.address;
+    // TODO: Send address to indie goal contract if defined
   } else if (
     chainContracts.profile.isUpgreadable &&
     !chainContracts.profile.impl
@@ -62,6 +63,7 @@ async function main() {
       isInitializeRequired: chainContracts.keeper.isInitializable,
     });
     chainContracts.keeper.proxy = contract.address;
+    // TODO: Send address to indie goal contract if defined
   } else if (
     chainContracts.keeper.isUpgreadable &&
     !chainContracts.keeper.impl

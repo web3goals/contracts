@@ -44,6 +44,35 @@ export const contracts: {
       impl: "0xF6Aee0B41Bdc6A4A43B194366F7c2E46b30D9eFd",
     },
   },
+  mumbaiProduction: {
+    profile: {
+      name: "Profile",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xD67EA1d21c374DfB6618F35B0e40426ac42cE557",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x244fD9faCC2c3A73745222Bb6862d4c0Bbb07b0D",
+    },
+    keeper: {
+      name: "Keeper",
+      version: "0.3",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x198C2E3A15f77c3eF976c2A8b419096b7A80b084",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0x860c58c01b068E9A67633cb202Ebb614443f3F67",
+    },
+    indieGoal: {
+      name: "Indie Goal",
+      version: "0.4",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xd45d57d50fa83A33aEC45B7cb7ED6d990B7BDb67",
+      proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
+      impl: "0xF6Aee0B41Bdc6A4A43B194366F7c2E46b30D9eFd",
+    },
+  },
 };
 
 export const obsoleteContracts: {

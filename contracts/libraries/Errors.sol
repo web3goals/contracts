@@ -19,6 +19,6 @@ library Errors {
     error AuthorCannotEvaluateOwnMessage();
     error MessageAlreadyEvaluated();
     error SendingStakeToAuthorFailed();
-    error SendingStakeToKeeperFailed();
+    error SendingStakeToTreasuryFailed();
     error SendingStakeToMotivatorFailed();
 }

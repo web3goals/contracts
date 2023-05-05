@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import {
   IndieGoal,
   IndieGoal__factory,
-  Keeper,
-  Keeper__factory,
+  Treasury,
+  Treasury__factory,
   Profile,
   Profile__factory,
 } from "../typechain-types";
@@ -31,7 +31,7 @@ export const goalParams = {
     description: "Train every week for 3 months",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
-    stakeForKeeper: BigNumber.from("5000000000000000"),
+    stakeForTreasury: BigNumber.from("5000000000000000"),
     stakeForMotivators: BigNumber.from("45000000000000000"),
     extraDataUri: "ipfs://abc",
   },
@@ -65,7 +65,7 @@ export let userThreeAddress: string;
 export let userFourAddress: string;
 
 export let profileContract: Profile;
-export let keeperContract: Keeper;
+export let treasuryContract: Treasury;
 export let goalContract: IndieGoal;
 
 export function makeSuiteCleanRoom(name: string, tests: () => void) {
@@ -107,15 +107,15 @@ before(async function () {
   profileContract = await new Profile__factory(deployer).deploy();
   await profileContract.initialize();
 
-  // Deploy keeper contract
-  keeperContract = await new Keeper__factory(deployer).deploy();
-  await keeperContract.initialize();
+  // Deploy treasury contract
+  treasuryContract = await new Treasury__factory(deployer).deploy();
+  await treasuryContract.initialize();
 
   // Deploy goal contract
   goalContract = await new IndieGoal__factory(deployer).deploy();
   await goalContract.initialize(
     profileContract.address,
-    keeperContract.address,
+    treasuryContract.address,
     goalContractParams.usageFeePercent
   );
 });

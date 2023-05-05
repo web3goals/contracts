@@ -1,8 +1,8 @@
 import hre, { ethers } from "hardhat";
 import {
   IndieGoal__factory,
-  Keeper__factory,
   Profile__factory,
+  Treasury__factory,
 } from "../../typechain-types";
 import { INDIE_GOAL_CONTRACT_USAGE_FEE_PERCENT } from "./constants";
 import { contracts } from "./contracts";
@@ -53,26 +53,26 @@ async function main() {
     );
   }
 
-  // Deploy or upgrade keeper contract
-  if (!chainContracts.keeper.proxy) {
+  // Deploy or upgrade treasury contract
+  if (!chainContracts.treasury.proxy) {
     const contract = await deployWithLogs({
       chainName: chain,
-      contractName: chainContracts.keeper.name,
-      contractFactory: new Keeper__factory(deployerWallet),
-      isProxyRequired: chainContracts.keeper.isUpgreadable,
-      isInitializeRequired: chainContracts.keeper.isInitializable,
+      contractName: chainContracts.treasury.name,
+      contractFactory: new Treasury__factory(deployerWallet),
+      isProxyRequired: chainContracts.treasury.isUpgreadable,
+      isInitializeRequired: chainContracts.treasury.isInitializable,
     });
-    chainContracts.keeper.proxy = contract.address;
+    chainContracts.treasury.proxy = contract.address;
     // TODO: Send address to indie goal contract if defined
   } else if (
-    chainContracts.keeper.isUpgreadable &&
-    !chainContracts.keeper.impl
+    chainContracts.treasury.isUpgreadable &&
+    !chainContracts.treasury.impl
   ) {
     await upgradeProxyWithLogs(
       chain,
-      chainContracts.keeper.name,
-      chainContracts.keeper.proxy,
-      new Keeper__factory(deployerWallet)
+      chainContracts.treasury.name,
+      chainContracts.treasury.proxy,
+      new Treasury__factory(deployerWallet)
     );
   }
 
@@ -84,7 +84,7 @@ async function main() {
       contractFactory: new IndieGoal__factory(deployerWallet),
       contractInitializeArgs: [
         chainContracts.profile.proxy,
-        chainContracts.keeper.proxy,
+        chainContracts.treasury.proxy,
         INDIE_GOAL_CONTRACT_USAGE_FEE_PERCENT,
       ],
       isProxyRequired: chainContracts.indieGoal.isUpgreadable,

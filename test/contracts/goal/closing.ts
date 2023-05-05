@@ -9,7 +9,7 @@ import {
   goalMessageExtraDataUris,
   goalParams,
   goalProofExtraDataUris,
-  keeperContract,
+  treasuryContract,
   makeSuiteCleanRoom,
   userFour,
   userOne,
@@ -146,14 +146,14 @@ makeSuiteCleanRoom("Goal Closing", function () {
     ).to.be.reverted;
   });
 
-  it("Not goal author should be able to close a goal after deadline and stake should be send to keeper", async function () {
+  it("Not goal author should be able to close a goal after deadline and stake should be send to treasury", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
       goalContract.connect(userTwo).close(goalWithProofs)
     ).to.changeEtherBalances(
-      [userOne, keeperContract.address, goalContract.address],
+      [userOne, treasuryContract.address, goalContract.address],
       [
         ethers.constants.Zero,
         goalParams.one.stake,
@@ -171,7 +171,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(reputation[2]).to.equal(1);
   });
 
-  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to keeper and motivators", async function () {
+  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to treasury and motivators", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
@@ -182,7 +182,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
         userTwo,
         userThree,
         userFour,
-        keeperContract.address,
+        treasuryContract.address,
         goalContract.address,
       ],
       [
@@ -191,7 +191,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
         goalParams.one.stakeForMotivators
           .div(BigNumber.from("4"))
           .mul(BigNumber.from("3")),
-        goalParams.one.stakeForKeeper,
+        goalParams.one.stakeForTreasury,
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
       ]
     );

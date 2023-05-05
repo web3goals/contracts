@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /**
  * A contract that holds funds received from other contracts.
  */
-contract Keeper is OwnableUpgradeable {
+contract Treasury is OwnableUpgradeable {
     event Received(address sender, uint value);
 
     function initialize() public initializer {

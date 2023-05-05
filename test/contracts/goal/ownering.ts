@@ -19,7 +19,7 @@ makeSuiteCleanRoom("Goal Ownering", function () {
     await expect(
       goalContract
         .connect(deployer)
-        .setKeeperAddress(ethers.constants.AddressZero)
+        .setTreasuryAddress(ethers.constants.AddressZero)
     ).to.be.not.reverted;
     await expect(
       goalContract.connect(deployer).setUsageFeePercent(0)
@@ -40,7 +40,7 @@ makeSuiteCleanRoom("Goal Ownering", function () {
     await expect(
       goalContract
         .connect(userOne)
-        .setKeeperAddress(ethers.constants.AddressZero)
+        .setTreasuryAddress(ethers.constants.AddressZero)
     ).to.be.reverted;
     await expect(
       goalContract.connect(userOne).setUsageFeePercent(0)

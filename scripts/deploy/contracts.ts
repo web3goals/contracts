@@ -11,7 +11,7 @@ interface DeployedContract {
 export const contracts: {
   [key: string]: {
     profile: DeployedContract;
-    keeper: DeployedContract;
+    treasury: DeployedContract;
     indieGoal: DeployedContract;
   };
 } = {
@@ -25,8 +25,8 @@ export const contracts: {
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
       impl: "0x244fD9faCC2c3A73745222Bb6862d4c0Bbb07b0D",
     },
-    keeper: {
-      name: "Keeper",
+    treasury: {
+      name: "Treasury",
       version: "0.2",
       isUpgreadable: true,
       isInitializable: true,
@@ -54,8 +54,8 @@ export const contracts: {
       proxyAdmin: "0x575Ea23695370920464910103b542A9c63bC36F8",
       impl: "0x244fD9faCC2c3A73745222Bb6862d4c0Bbb07b0D",
     },
-    keeper: {
-      name: "Keeper",
+    treasury: {
+      name: "Treasury",
       version: "0.3",
       isUpgreadable: true,
       isInitializable: true,

@@ -4,7 +4,6 @@ import {
   Profile__factory,
   Treasury__factory,
 } from "../../typechain-types";
-import { INDIE_GOAL_CONTRACT_USAGE_FEE_PERCENT } from "./constants";
 import { contracts } from "./contracts";
 import { deployWithLogs, upgradeProxyWithLogs } from "./utils";
 
@@ -85,7 +84,6 @@ async function main() {
       contractInitializeArgs: [
         chainContracts.profile.proxy,
         chainContracts.treasury.proxy,
-        INDIE_GOAL_CONTRACT_USAGE_FEE_PERCENT,
       ],
       isProxyRequired: chainContracts.indieGoal.isUpgreadable,
       isInitializeRequired: chainContracts.indieGoal.isInitializable,

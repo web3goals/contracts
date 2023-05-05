@@ -22,17 +22,11 @@ export const profileUris = {
   four: "ipfs://456",
 };
 
-export const goalContractParams = {
-  usageFeePercent: 10,
-};
-
 export const goalParams = {
   one: {
     description: "Train every week for 3 months",
     deadlineTimestamp: BigNumber.from(getEpochSeconds() + 2 * SECONDS_PER_DAY),
     stake: BigNumber.from("50000000000000000"),
-    stakeForTreasury: BigNumber.from("5000000000000000"),
-    stakeForMotivators: BigNumber.from("45000000000000000"),
     extraDataUri: "ipfs://abc",
   },
 };
@@ -115,7 +109,6 @@ before(async function () {
   goalContract = await new IndieGoal__factory(deployer).deploy();
   await goalContract.initialize(
     profileContract.address,
-    treasuryContract.address,
-    goalContractParams.usageFeePercent
+    treasuryContract.address
   );
 });

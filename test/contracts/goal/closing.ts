@@ -171,27 +171,16 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(reputation[2]).to.equal(1);
   });
 
-  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to treasury and motivators", async function () {
+  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to treasury", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
     await expect(
       goalContract.connect(userTwo).close(goalWithProofsAndMotivators)
     ).to.changeEtherBalances(
+      [treasuryContract.address, goalContract.address],
       [
-        userTwo,
-        userThree,
-        userFour,
-        treasuryContract.address,
-        goalContract.address,
-      ],
-      [
-        goalParams.one.stakeForMotivators.div(BigNumber.from("4")),
-        ethers.constants.Zero,
-        goalParams.one.stakeForMotivators
-          .div(BigNumber.from("4"))
-          .mul(BigNumber.from("3")),
-        goalParams.one.stakeForTreasury,
+        goalParams.one.stake,
         goalParams.one.stake.mul(ethers.constants.NegativeOne),
       ]
     );

@@ -54,7 +54,6 @@ contract IndieGoal is
 
     address private _profileAddress;
     address private _treasuryAddress;
-    uint private _usageFeePercent;
     string _imageSVG;
     Counters.Counter private _counter;
     mapping(uint256 => DataTypes.IndieGoalParams) private _params;
@@ -64,15 +63,13 @@ contract IndieGoal is
 
     function initialize(
         address profileAddress,
-        address treasuryAddress,
-        uint usageFeePercent
+        address treasuryAddress
     ) public initializer {
         __ERC721_init("Web3 Goals - Indie Goals", "W3GIG");
         __Ownable_init();
         __Pausable_init();
         _profileAddress = profileAddress;
         _treasuryAddress = treasuryAddress;
-        _usageFeePercent = usageFeePercent;
         _imageSVG = '<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" fill="white"/><path d="M279.139 211.497V172.426C279.139 168.42 280.732 164.578 283.565 161.745L328.887 116.42C332.322 112.99 337.193 111.417 341.986 112.196C346.776 112.975 350.901 116.007 353.074 120.348L365.929 146.064L391.643 158.905C395.991 161.075 399.026 165.205 399.804 170.001C400.583 174.797 399.008 179.674 395.571 183.108L350.248 228.433C347.415 231.266 343.573 232.859 339.567 232.859H300.499L259.603 273.758C255.766 277.466 250.257 278.873 245.113 277.461C239.969 276.053 235.947 272.031 234.539 266.886C233.127 261.742 234.534 256.233 238.241 252.396L279.139 211.497ZM309.352 178.681V202.644H333.314L359.389 176.567L347.907 170.826C344.991 169.361 342.629 166.991 341.169 164.072L335.428 152.604L309.352 178.681Z" fill="#2B6EFD"/><path d="M248.5 127C253.918 127 258.925 129.892 261.635 134.584C264.344 139.277 264.344 145.058 261.635 149.75C258.925 154.443 253.918 157.334 248.5 157.334C220.342 157.334 193.339 168.519 173.431 188.431C153.519 208.34 142.334 235.343 142.334 263.5C142.334 291.657 153.519 318.661 173.431 338.569C193.34 358.481 220.343 369.666 248.5 369.666C276.657 369.666 303.661 358.481 323.569 338.569C343.481 318.66 354.665 291.657 354.665 263.5C354.665 258.082 357.558 253.075 362.25 250.365C366.942 247.656 372.723 247.656 377.416 250.365C382.108 253.075 385 258.082 385 263.5C385 299.702 370.619 334.422 345.019 360.019C319.42 385.619 284.701 400 248.5 400C212.299 400 177.578 385.619 151.981 360.019C126.381 334.42 112 299.701 112 263.5C112 227.299 126.381 192.578 151.981 166.981C177.58 141.381 212.299 127 248.5 127ZM248.5 187.666C253.918 187.666 258.925 190.558 261.635 195.251C264.344 199.943 264.344 205.724 261.635 210.417C258.925 215.109 253.918 218.001 248.5 218.001C236.432 218.001 224.859 222.795 216.327 231.329C207.793 239.86 203 251.433 203 263.501C203 275.569 207.793 287.143 216.327 295.674C224.859 304.208 236.432 309.002 248.5 309.002C260.568 309.002 272.141 304.208 280.673 295.674C289.207 287.143 294 275.569 294 263.501C294 258.083 296.892 253.076 301.585 250.367C306.277 247.657 312.058 247.657 316.751 250.367C321.443 253.076 324.335 258.083 324.335 263.501C324.335 283.613 316.344 302.903 302.123 317.124C287.901 331.346 268.612 339.336 248.5 339.336C228.388 339.336 209.099 331.346 194.877 317.124C180.656 302.903 172.665 283.613 172.665 263.501C172.665 243.389 180.656 224.1 194.877 209.878C209.099 195.657 228.388 187.666 248.5 187.666Z" fill="#FF4400"/></svg>';
     }
 
@@ -120,10 +117,6 @@ contract IndieGoal is
 
     function setTreasuryAddress(address treasuryAddress) public onlyOwner {
         _treasuryAddress = treasuryAddress;
-    }
-
-    function setUsageFeePercent(uint usageFeePercent) public onlyOwner {
-        _usageFeePercent = usageFeePercent;
     }
 
     function setImageSVG(string memory imageSVG) public onlyOwner {
@@ -271,10 +264,6 @@ contract IndieGoal is
 
     function getTreasuryAddress() public view returns (address) {
         return _treasuryAddress;
-    }
-
-    function getUsageFeePercent() public view returns (uint) {
-        return _usageFeePercent;
     }
 
     function getImageSVG() public view returns (string memory) {
@@ -446,7 +435,7 @@ contract IndieGoal is
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = true;
         emit ClosedAsAchieved(tokenId, _params[tokenId]);
-        // Return stake
+        // Send stake to author
         (bool sent, ) = _params[tokenId].authorAddress.call{
             value: _params[tokenId].authorStake
         }("");
@@ -458,43 +447,11 @@ contract IndieGoal is
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
         emit ClosedAsFailed(tokenId, _params[tokenId]);
-        // Calculate total motivator points
-        uint totalMotivatorPoints;
-        for (uint i = 0; i < _motivators[tokenId].length; i++) {
-            totalMotivatorPoints += _getMotivatorPoints(
-                _motivators[tokenId][i]
-            );
-        }
-        // If there are no motivators with points, then send stake to treasury
-        if (totalMotivatorPoints == 0) {
-            (bool sentToKepper, ) = _treasuryAddress.call{
-                value: _params[tokenId].authorStake
-            }("");
-            if (!sentToKepper) revert Errors.SendingStakeToTreasuryFailed();
-        }
-        // If motivators with points exist, then send part of stake to them and part to treasury
-        else {
-            // Send stake to treasury
-            uint stakeForTreasury = (_params[tokenId].authorStake *
-                _usageFeePercent) / 100;
-            (bool sentToKepper, ) = _treasuryAddress.call{
-                value: stakeForTreasury
-            }("");
-            if (!sentToKepper) revert Errors.SendingStakeToTreasuryFailed();
-            // Send stake to motivators
-            uint stakeForMotivators = _params[tokenId].authorStake -
-                stakeForTreasury;
-            for (uint i = 0; i < _motivators[tokenId].length; i++) {
-                uint stakeForMotivator = (_getMotivatorPoints(
-                    _motivators[tokenId][i]
-                ) * stakeForMotivators) / totalMotivatorPoints;
-                (bool sentToMotivator, ) = _motivators[tokenId][i]
-                    .accountAddress
-                    .call{value: stakeForMotivator}("");
-                if (!sentToMotivator)
-                    revert Errors.SendingStakeToMotivatorFailed();
-            }
-        }
+        // Send stake to treasury
+        (bool sent, ) = _treasuryAddress.call{
+            value: _params[tokenId].authorStake
+        }("");
+        if (!sent) revert Errors.SendingStakeToTreasuryFailed();
     }
 
     /**

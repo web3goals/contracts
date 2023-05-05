@@ -20,5 +20,4 @@ library Errors {
     error MessageAlreadyEvaluated();
     error SendingStakeToAuthorFailed();
     error SendingStakeToTreasuryFailed();
-    error SendingStakeToMotivatorFailed();
 }

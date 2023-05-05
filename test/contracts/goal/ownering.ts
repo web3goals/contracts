@@ -22,9 +22,6 @@ makeSuiteCleanRoom("Goal Ownering", function () {
         .setTreasuryAddress(ethers.constants.AddressZero)
     ).to.be.not.reverted;
     await expect(
-      goalContract.connect(deployer).setUsageFeePercent(0)
-    ).to.be.not.reverted;
-    await expect(
       goalContract.connect(deployer).setImageSVG("")
     ).to.be.not.reverted;
   });
@@ -41,9 +38,6 @@ makeSuiteCleanRoom("Goal Ownering", function () {
       goalContract
         .connect(userOne)
         .setTreasuryAddress(ethers.constants.AddressZero)
-    ).to.be.reverted;
-    await expect(
-      goalContract.connect(userOne).setUsageFeePercent(0)
     ).to.be.reverted;
     await expect(goalContract.connect(userOne).setImageSVG("")).to.be.reverted;
   });

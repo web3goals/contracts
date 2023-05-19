@@ -90,7 +90,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
       .evaluateMessage(goalWithProofsAndMotivators, 2, false, true);
   });
 
-  it("Goal author should be able to close a goal with proofs before deadline and return stake", async function () {
+  it("Goal author must successfully close a goal with proofs before deadline and return stake", async function () {
     // Close goal
     await expect(
       goalContract.connect(userOne).close(goalWithProofs)
@@ -112,7 +112,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(reputation[2]).to.equal(0);
   });
 
-  it("Goal author should be able to close a goal with proofs and motivators before deadline and return stake", async function () {
+  it("Goal author must successfully close a goal with proofs and motivators before deadline and return stake", async function () {
     // Close goal
     await expect(
       goalContract.connect(userOne).close(goalWithProofsAndMotivators)
@@ -134,19 +134,19 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(reputation[2]).to.equal(0);
   });
 
-  it("Goal author should not be able to close a goal without proofs before deadline", async function () {
+  it("Goal author must unsuccessfully close a goal without proofs before deadline", async function () {
     await expect(
       goalContract.connect(userOne).close(goalWithoutProofs)
     ).to.be.reverted;
   });
 
-  it("Not goal author should not be able to close a goal with proofs before deadline", async function () {
+  it("Not goal author must unsuccessfully close a goal with proofs before deadline", async function () {
     await expect(
       goalContract.connect(userTwo).close(goalWithProofs)
     ).to.be.reverted;
   });
 
-  it("Not goal author should be able to close a goal after deadline and stake should be send to treasury", async function () {
+  it("Not goal author must successfully close a goal after deadline and stake must be send to treasury", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal
@@ -171,7 +171,7 @@ makeSuiteCleanRoom("Goal Closing", function () {
     expect(reputation[2]).to.equal(1);
   });
 
-  it("Not goal author should be able to close a goal with motivators after deadline and stake should be send to treasury", async function () {
+  it("Not goal author must successfully close a goal with motivators after deadline and stake must be send to treasury", async function () {
     // Increase network time
     await time.increase(3 * SECONDS_PER_DAY);
     // Close goal

@@ -31,7 +31,7 @@ makeSuiteCleanRoom("Goal Transfering", function () {
     goal = await goalContract.connect(userOne).getCurrentCounter();
   });
 
-  it("Goal token owner should fail to transfer token", async function () {
+  it("Goal token owner must unsuccessfully transfer token", async function () {
     await expect(
       goalContract
         .connect(userOne)

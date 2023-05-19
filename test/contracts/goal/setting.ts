@@ -10,7 +10,7 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Setting", function () {
-  it("User should be able to set a goal", async function () {
+  it("User must successfully set a goal", async function () {
     // Create profiles
     await createProfiles();
     // Set goal
@@ -45,7 +45,7 @@ makeSuiteCleanRoom("Goal Setting", function () {
     expect(params.isAchieved).to.equal(false);
   });
 
-  it("User should not be able to set a goal without profile", async function () {
+  it("User must unsuccessfully set a goal without profile", async function () {
     // Set goal
     await expect(
       goalContract

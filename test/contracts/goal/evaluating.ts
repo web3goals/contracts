@@ -46,7 +46,7 @@ makeSuiteCleanRoom("Goal Evaluating for Messages", function () {
       .postMessage(goal, goalMessageExtraDataUris.three);
   });
 
-  it("Goal author should be able evaluate messages posted by not goal author", async function () {
+  it("Goal author must successfully evaluate messages posted by not goal author", async function () {
     // Evaluate
     await expect(
       goalContract.connect(userOne).evaluateMessage(goal, 1, true, false)
@@ -79,7 +79,7 @@ makeSuiteCleanRoom("Goal Evaluating for Messages", function () {
     expect(motivatorTwoReputation[1]).to.equal(1);
   });
 
-  it("Goal author should not be able evaluate a message posted by goal author", async function () {
+  it("Goal author must unsuccessfully evaluate a message posted by goal author", async function () {
     await expect(
       goalContract.connect(userOne).evaluateMessage(goal, 0, true, false)
     ).to.be.revertedWithCustomError(
@@ -88,19 +88,19 @@ makeSuiteCleanRoom("Goal Evaluating for Messages", function () {
     );
   });
 
-  it("Not goal author should not be able evaluate a message", async function () {
+  it("Not goal author must unsuccessfully evaluate a message", async function () {
     await expect(
       goalContract.connect(userTwo).evaluateMessage(goal, 1, true, false)
     ).to.be.revertedWithCustomError(goalContract, ERRORS.notAuthor);
   });
 
-  it("Goal author should not be able evaluate a not existing message", async function () {
+  it("Goal author must unsuccessfully evaluate a not existing message", async function () {
     await expect(
       goalContract.connect(userOne).evaluateMessage(goal, 3, true, false)
     ).to.be.revertedWithCustomError(goalContract, ERRORS.messageNotExists);
   });
 
-  it("Goal author should not be able evaluate a message posted by not goal author twice", async function () {
+  it("Goal author must unsuccessfully evaluate a message posted by not goal author twice", async function () {
     await expect(
       goalContract.connect(userOne).evaluateMessage(goal, 1, true, false)
     ).to.be.not.reverted;

@@ -9,7 +9,7 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Profile Setting", function () {
-  it("User should be able to set a token uri", async function () {
+  it("User must successfully set a token uri", async function () {
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)
     ).to.be.not.reverted;
@@ -21,7 +21,7 @@ makeSuiteCleanRoom("Profile Setting", function () {
     );
   });
 
-  it("User should to own only one token after several uri changes", async function () {
+  it("User must to own only one token after several uri changes", async function () {
     // First change
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)

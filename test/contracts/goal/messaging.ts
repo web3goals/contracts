@@ -36,7 +36,7 @@ makeSuiteCleanRoom("Goal Messaging", function () {
     goal = await goalContract.connect(userOne).getCurrentCounter();
   });
 
-  it("Goal author should be able to post a message", async function () {
+  it("Goal author must successfully post a message", async function () {
     // Post message
     await expect(
       goalContract
@@ -53,7 +53,7 @@ makeSuiteCleanRoom("Goal Messaging", function () {
     expect(motivators.length).to.equal(0);
   });
 
-  it("Not goal authors should be able to post a message", async function () {
+  it("Not goal authors must successfully post a message", async function () {
     // Post messages
     await expect(
       goalContract

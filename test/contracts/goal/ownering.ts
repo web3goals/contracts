@@ -8,7 +8,7 @@ import {
 } from "../../setup";
 
 makeSuiteCleanRoom("Goal Ownering", function () {
-  it("Goal contract owner should be able to use owner functions", async function () {
+  it("Goal contract owner must successfully use owner functions", async function () {
     await expect(goalContract.connect(deployer).pause()).to.be.not.reverted;
     await expect(goalContract.connect(deployer).unpause()).to.be.not.reverted;
     await expect(
@@ -26,7 +26,7 @@ makeSuiteCleanRoom("Goal Ownering", function () {
     ).to.be.not.reverted;
   });
 
-  it("Not goal contract owner should not be able to use owner functions", async function () {
+  it("Not goal contract owner must unsuccessfully use owner functions", async function () {
     await expect(goalContract.connect(userOne).pause()).to.be.reverted;
     await expect(goalContract.connect(userOne).unpause()).to.be.reverted;
     await expect(

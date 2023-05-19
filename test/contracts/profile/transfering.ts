@@ -20,7 +20,7 @@ makeSuiteCleanRoom("Profile Transfering", function () {
     profile = await profileContract.getTokenId(userOneAddress);
   });
 
-  it("Profile token owner should fail to transfer token", async function () {
+  it("Profile token owner must unsuccessfully transfer token", async function () {
     await expect(
       profileContract
         .connect(userOne)

@@ -1,15 +1,25 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { EARLY_ADOPTER_ROLE } from "../../helpers/roles";
 import {
+  deployer,
   makeSuiteCleanRoom,
   profileContract,
   profileUris,
   userOne,
   userOneAddress,
+  userTwo,
 } from "../../setup";
 
 makeSuiteCleanRoom("Profile Setting", function () {
-  it("User must successfully set a token uri", async function () {
+  beforeEach(async function () {
+    // Grant role for user one
+    await profileContract
+      .connect(deployer)
+      .grantRole(EARLY_ADOPTER_ROLE, userOneAddress);
+  });
+
+  it("User with a role must successfully set a token uri", async function () {
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)
     ).to.be.not.reverted;
@@ -21,7 +31,7 @@ makeSuiteCleanRoom("Profile Setting", function () {
     );
   });
 
-  it("User must to own only one token after several uri changes", async function () {
+  it("User with a role must to own only one token after several uri changes", async function () {
     // First change
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)
@@ -42,5 +52,11 @@ makeSuiteCleanRoom("Profile Setting", function () {
     expect(await profileContract.getURI(userOneAddress)).to.equal(
       profileUris.two
     );
+  });
+
+  it("User without a role must unsuccessfully set a token uri", async function () {
+    await expect(
+      profileContract.connect(userTwo).setURI(profileUris.one)
+    ).to.be.reverted;
   });
 });

@@ -1,6 +1,8 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { EARLY_ADOPTER_ROLE } from "../../helpers/roles";
 import {
+  deployer,
   makeSuiteCleanRoom,
   profileContract,
   profileUris,
@@ -13,7 +15,11 @@ makeSuiteCleanRoom("Profile Transfering", function () {
   let profile: BigNumber;
 
   beforeEach(async function () {
-    // Set uri by user one
+    // Grant role for user one
+    await profileContract
+      .connect(deployer)
+      .grantRole(EARLY_ADOPTER_ROLE, userOneAddress);
+    // Create profile by user one
     await expect(
       profileContract.connect(userOne).setURI(profileUris.one)
     ).to.be.not.reverted;

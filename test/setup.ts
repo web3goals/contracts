@@ -9,6 +9,7 @@ import {
   Profile__factory,
 } from "../typechain-types";
 import { SECONDS_PER_DAY } from "./helpers/constants";
+import { EARLY_ADOPTER_ROLE } from "./helpers/roles";
 import {
   getEpochSeconds,
   revertToSnapshot,
@@ -75,6 +76,20 @@ export function makeSuiteCleanRoom(name: string, tests: () => void) {
 }
 
 export async function createProfiles() {
+  // Grant roles
+  await profileContract
+    .connect(deployer)
+    .grantRole(EARLY_ADOPTER_ROLE, userOneAddress);
+  await profileContract
+    .connect(deployer)
+    .grantRole(EARLY_ADOPTER_ROLE, userTwoAddress);
+  await profileContract
+    .connect(deployer)
+    .grantRole(EARLY_ADOPTER_ROLE, userThreeAddress);
+  await profileContract
+    .connect(deployer)
+    .grantRole(EARLY_ADOPTER_ROLE, userFourAddress);
+  // Create profiles
   await profileContract.connect(userOne).setURI(profileUris.one);
   await profileContract.connect(userTwo).setURI(profileUris.two);
   await profileContract.connect(userThree).setURI(profileUris.three);

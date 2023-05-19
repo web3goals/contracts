@@ -21,34 +21,34 @@ contract IndieGoal is
 {
     using Counters for Counters.Counter;
 
-    event Set(uint256 indexed tokenId, DataTypes.IndieGoalParams params);
-    event ProofPosted(uint256 indexed tokenId, DataTypes.IndieGoalProof proof);
+    event Set(uint indexed tokenId, DataTypes.IndieGoalParams params);
+    event ProofPosted(uint indexed tokenId, DataTypes.IndieGoalProof proof);
     event MotivatorAdded(
-        uint256 indexed tokenId,
+        uint indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
     event MotivatorUpdated(
-        uint256 indexed tokenId,
+        uint indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
     event MessagePosted(
-        uint256 indexed tokenId,
-        uint256 indexed messageId,
+        uint indexed tokenId,
+        uint indexed messageId,
         DataTypes.IndieGoalMessage message
     );
     event MessageEvaluated(
-        uint256 indexed tokenId,
-        uint256 indexed messageId,
+        uint indexed tokenId,
+        uint indexed messageId,
         DataTypes.IndieGoalMessage message
     );
     event ClosedAsAchieved(
-        uint256 indexed tokenId,
+        uint indexed tokenId,
         DataTypes.IndieGoalParams params
     );
     event ClosedAsFailed(
-        uint256 indexed tokenId,
+        uint indexed tokenId,
         DataTypes.IndieGoalParams params
     );
 
@@ -56,10 +56,10 @@ contract IndieGoal is
     address private _treasuryAddress;
     string _imageSVG;
     Counters.Counter private _counter;
-    mapping(uint256 => DataTypes.IndieGoalParams) private _params;
-    mapping(uint256 => DataTypes.IndieGoalProof[]) private _proofs;
-    mapping(uint256 => DataTypes.IndieGoalMotivator[]) private _motivators;
-    mapping(uint256 => DataTypes.IndieGoalMessage[]) private _messages;
+    mapping(uint => DataTypes.IndieGoalParams) private _params;
+    mapping(uint => DataTypes.IndieGoalProof[]) private _proofs;
+    mapping(uint => DataTypes.IndieGoalMotivator[]) private _motivators;
+    mapping(uint => DataTypes.IndieGoalMessage[]) private _messages;
 
     function initialize(
         address profileAddress,
@@ -83,17 +83,17 @@ contract IndieGoal is
         _;
     }
 
-    modifier whenExists(uint256 tokenId) {
+    modifier whenExists(uint tokenId) {
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         _;
     }
 
-    modifier wnehNotClosed(uint256 tokenId) {
+    modifier wnehNotClosed(uint tokenId) {
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         _;
     }
 
-    modifier onlyAuthor(uint256 tokenId) {
+    modifier onlyAuthor(uint tokenId) {
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
         _;
@@ -132,7 +132,7 @@ contract IndieGoal is
         uint stake,
         uint deadlineTimestamp,
         string memory extraDataURI
-    ) public payable whenNotPaused onlyWithProfile returns (uint256) {
+    ) public payable whenNotPaused onlyWithProfile returns (uint) {
         // Check data
         if (msg.value != stake) revert Errors.MessageValueMismatch();
         if (stake <= 0) revert Errors.StakeInvalid();
@@ -141,7 +141,7 @@ contract IndieGoal is
         // Update counter
         _counter.increment();
         // Mint token
-        uint256 newTokenId = _counter.current();
+        uint newTokenId = _counter.current();
         _mint(msg.sender, newTokenId);
         // Set params
         DataTypes.IndieGoalParams memory tokenParams = DataTypes
@@ -162,7 +162,7 @@ contract IndieGoal is
     }
 
     function postProof(
-        uint256 tokenId,
+        uint tokenId,
         string memory extraDataURI
     )
         public
@@ -180,7 +180,7 @@ contract IndieGoal is
     }
 
     function postMessage(
-        uint256 tokenId,
+        uint tokenId,
         string memory extraDataURI
     )
         public
@@ -204,8 +204,8 @@ contract IndieGoal is
     }
 
     function evaluateMessage(
-        uint256 tokenId,
-        uint256 messageId,
+        uint tokenId,
+        uint messageId,
         bool isMotivating,
         bool isSuperMotivating
     )
@@ -245,7 +245,7 @@ contract IndieGoal is
     }
 
     function close(
-        uint256 tokenId
+        uint tokenId
     ) public whenNotPaused whenExists(tokenId) wnehNotClosed(tokenId) {
         if (_params[tokenId].deadlineTimestamp > block.timestamp) {
             _closeAsAchievedBeforeDeadline(tokenId);
@@ -275,25 +275,25 @@ contract IndieGoal is
     }
 
     function getParams(
-        uint256 tokenId
+        uint tokenId
     ) public view returns (DataTypes.IndieGoalParams memory) {
         return _params[tokenId];
     }
 
     function getProofs(
-        uint256 tokenId
+        uint tokenId
     ) public view returns (DataTypes.IndieGoalProof[] memory) {
         return _proofs[tokenId];
     }
 
     function getMotivators(
-        uint256 tokenId
+        uint tokenId
     ) public view returns (DataTypes.IndieGoalMotivator[] memory) {
         return _motivators[tokenId];
     }
 
     function getMessages(
-        uint256 tokenId
+        uint tokenId
     ) public view returns (DataTypes.IndieGoalMessage[] memory) {
         return _messages[tokenId];
     }
@@ -343,7 +343,7 @@ contract IndieGoal is
     }
 
     function tokenURI(
-        uint256 tokenId
+        uint tokenId
     ) public view override returns (string memory) {
         return
             string(
@@ -384,7 +384,7 @@ contract IndieGoal is
     /// ***** INTERNAL FUNCTIONS *****
     /// ******************************
 
-    function _addMotivator(uint256 tokenId, address accountAddress) internal {
+    function _addMotivator(uint tokenId, address accountAddress) internal {
         // Check if author
         if (_params[tokenId].authorAddress == accountAddress) return;
         // Check if already exists
@@ -401,7 +401,7 @@ contract IndieGoal is
     }
 
     function _updateMotivator(
-        uint256 tokenId,
+        uint tokenId,
         address accountAddress,
         uint additionalMotivations,
         uint additionalSuperMotivations
@@ -427,7 +427,7 @@ contract IndieGoal is
     }
 
     function _closeAsAchievedBeforeDeadline(
-        uint256 tokenId
+        uint tokenId
     ) internal onlyAuthor(tokenId) {
         // Check data
         if (_proofs[tokenId].length == 0) revert Errors.ProofsNotFound();
@@ -442,7 +442,7 @@ contract IndieGoal is
         if (!sent) revert Errors.SendingStakeToAuthorFailed();
     }
 
-    function _closeAsFailedAfterDeadline(uint256 tokenId) internal {
+    function _closeAsFailedAfterDeadline(uint tokenId) internal {
         // Update token
         _params[tokenId].isClosed = true;
         _params[tokenId].isAchieved = false;
@@ -460,8 +460,8 @@ contract IndieGoal is
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 firstTokenId,
-        uint256 batchSize
+        uint firstTokenId,
+        uint batchSize
     ) internal virtual override(ERC721Upgradeable) {
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
         // Disable transfers except minting

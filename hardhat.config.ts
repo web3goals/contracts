@@ -29,9 +29,14 @@ const config: HardhatUserConfig = {
       url: process.env.RPC_URL_MUMBAI || "",
       accounts: accounts,
     },
+    polygon: {
+      url: process.env.RPC_URL_POLYGON || "",
+      accounts: accounts,
+    },
   },
   etherscan: {
     apiKey: {
+      polygon: process.env.ETHERSCAN_API_KEY_POLYGON || "",
       polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || "",
     },
   },

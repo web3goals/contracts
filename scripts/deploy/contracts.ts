@@ -44,4 +44,33 @@ export const contracts: {
       impl: "0xaC1b7E2D5E46909eba20a7958068C04744502fbB",
     },
   },
+  polygon: {
+    profile: {
+      name: "Profile",
+      version: "1.0",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0xa261503DE7f822E985878c1415CF17b9168f923E",
+      proxyAdmin: "0x1EFd7AaDCCc11B3503D42703958cc543C9DCF680",
+      impl: "0x53200724496237D82802d61520E01918C468954b",
+    },
+    treasury: {
+      name: "Treasury",
+      version: "1.0",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x58de57b6f4Cb1bBF9BaDD939181a2D26E92f1C44",
+      proxyAdmin: "0x1EFd7AaDCCc11B3503D42703958cc543C9DCF680",
+      impl: "0xb0B726e1B41F46805B26CE9f43Fa1A371EC174FC",
+    },
+    indieGoal: {
+      name: "Indie Goal",
+      version: "1.0",
+      isUpgreadable: true,
+      isInitializable: true,
+      proxy: "0x96BE97Face3FBb9a18489818c4114F58102dCE55",
+      proxyAdmin: "0x1EFd7AaDCCc11B3503D42703958cc543C9DCF680",
+      impl: "0xBe6738622aDEAC3f60b267Cbb5884268bc188c99",
+    },
+  },
 };

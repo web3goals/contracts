@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * A contract that holds funds received from other contracts.
+ * @title Treasury
+ * @author Web3 Goals
+ * @notice A contract that holds funds received from other contracts and users.
  */
 contract Treasury is OwnableUpgradeable {
     event Received(address sender, uint value);

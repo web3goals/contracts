@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
+/**
+ * @title Errors
+ * @author Web3 Goals
+ * @notice A standard library of errors used by the contracts.
+ */
 library Errors {
     // Common errors
     error TokenDoesNotExist();

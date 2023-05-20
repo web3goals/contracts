@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -13,7 +14,9 @@ import "./libraries/Constants.sol";
 import "./libraries/Errors.sol";
 
 /**
- * A contract that stores goals that can be closed with unverified proofs.
+ * @title IndieGoal
+ * @author Web3 Goals
+ * @notice A contract that stores indie goals that can be closed with unverified proofs.
  */
 contract IndieGoal is
     ERC721Upgradeable,
@@ -23,32 +26,91 @@ contract IndieGoal is
 {
     using Counters for Counters.Counter;
 
+    /**
+     * @dev Emitted when the goal is set.
+     *
+     * @param tokenId ID of the goal.
+     * @param params The params data.
+     */
     event Set(uint indexed tokenId, DataTypes.IndieGoalParams params);
+
+    /**
+     * @dev Emitted when the proof is posted.
+     *
+     * @param tokenId ID of the goal.
+     * @param proof The proof data.
+     */
     event ProofPosted(uint indexed tokenId, DataTypes.IndieGoalProof proof);
+
+    /**
+     * @dev Emitted when the motivator is added to the goal.
+     *
+     * @param tokenId ID of the goal.
+     * @param motivatorAccountAddress Address of the motivator.
+     * @param motivator The motivator data.
+     */
     event MotivatorAdded(
         uint indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
+
+    /**
+     * @dev Emitted when the motivator of the goal is updated.
+     *
+     * @param tokenId ID of the goal.
+     * @param motivatorAccountAddress Address of the motivator.
+     * @param motivator The motivator data.
+     */
     event MotivatorUpdated(
         uint indexed tokenId,
         address indexed motivatorAccountAddress,
         DataTypes.IndieGoalMotivator motivator
     );
+
+    /**
+     * @dev Emitted when the message for the goal is posted.
+     *
+     * @param tokenId ID of the goal.
+     * @param messageId ID of the message.
+     * @param message The message data.
+     */
     event MessagePosted(
         uint indexed tokenId,
         uint indexed messageId,
         DataTypes.IndieGoalMessage message
     );
+
+    /**
+     * @dev Emitted when the message for the goal is evaluated.
+     *
+     * @param tokenId ID of the goal.
+     * @param messageId ID of the message.
+     * @param message The message data.
+     */
     event MessageEvaluated(
         uint indexed tokenId,
         uint indexed messageId,
         DataTypes.IndieGoalMessage message
     );
+
+    /**
+     * @dev Emitted when the goal is closed as achieved.
+     *
+     * @param tokenId ID of the goal.
+     * @param params The params data.
+     */
     event ClosedAsAchieved(
         uint indexed tokenId,
         DataTypes.IndieGoalParams params
     );
+
+    /**
+     * @dev Emitted when the goal is closed as failed.
+     *
+     * @param tokenId ID of the goal.
+     * @param params The params data.
+     */
     event ClosedAsFailed(
         uint indexed tokenId,
         DataTypes.IndieGoalParams params
@@ -80,22 +142,34 @@ contract IndieGoal is
     /// ***** MODIFIERS *****
     /// *********************
 
+    /**
+     * @dev This modifier reverts if the caller does not have a profile.
+     */
     modifier onlyWithProfile() {
         if (IERC721Upgradeable(_profileAddress).balanceOf(msg.sender) == 0)
             revert Errors.ProfileNotExists();
         _;
     }
 
+    /**
+     * @dev This modifier reverts if the goal does not exist.
+     */
     modifier whenExists(uint tokenId) {
         if (!_exists(tokenId)) revert Errors.TokenDoesNotExist();
         _;
     }
 
+    /**
+     * @dev This modifier reverts if the goal is closed.
+     */
     modifier wnehNotClosed(uint tokenId) {
         if (_params[tokenId].isClosed) revert Errors.GoalClosed();
         _;
     }
 
+    /**
+     * @dev This modifier reverts if the caller is not the goal author.
+     */
     modifier onlyAuthor(uint tokenId) {
         if (_params[tokenId].authorAddress != msg.sender)
             revert Errors.NotAuthor();
@@ -130,6 +204,14 @@ contract IndieGoal is
     /// ***** USER FUNCTIONS *****
     /// **************************
 
+    /**
+     * @notice Set a goal with specified params.
+     *
+     * @param description Description for the goal.
+     * @param stake Stake for the goal.
+     * @param deadlineTimestamp Deadline for the goal.
+     * @param extraDataURI URI with the goal extra data.
+     */
     function set(
         string memory description,
         uint stake,
@@ -164,6 +246,12 @@ contract IndieGoal is
         return newTokenId;
     }
 
+    /**
+     * @notice Post a proof for the goal.
+     *
+     * @param tokenId ID of the goal.
+     * @param extraDataURI URI with the proof extra data.
+     */
     function postProof(
         uint tokenId,
         string memory extraDataURI
@@ -182,6 +270,12 @@ contract IndieGoal is
         emit ProofPosted(tokenId, proof);
     }
 
+    /**
+     * @notice Post a message for the goal.
+     *
+     * @param tokenId ID of the goal.
+     * @param extraDataURI URI with the message extra data.
+     */
     function postMessage(
         uint tokenId,
         string memory extraDataURI
@@ -206,6 +300,14 @@ contract IndieGoal is
         _addMotivator(tokenId, msg.sender);
     }
 
+    /**
+     * @notice Evaluate the message of the goal.
+     *
+     * @param tokenId ID of the goal.
+     * @param messageId ID of the message.
+     * @param isMotivating Boolean value that defines whether the message is motivating or not.
+     * @param isSuperMotivating Boolean value that defines whether the message is super motivating or not.
+     */
     function evaluateMessage(
         uint tokenId,
         uint messageId,
@@ -247,6 +349,11 @@ contract IndieGoal is
         );
     }
 
+    /**
+     * @notice Close the goal as successfull of failed depending on the goal state.
+     *
+     * @param tokenId ID of the goal.
+     */
     function close(
         uint tokenId
     )
@@ -464,7 +571,7 @@ contract IndieGoal is
     }
 
     /**
-     * Hook that is called before any token transfer.
+     * @dev A function that is called before any token transfer.
      */
     function _beforeTokenTransfer(
         address from,

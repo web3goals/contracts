@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.9;
 
+/**
+ * @title DataTypes
+ * @author Web3 Goals
+ * @notice A standard library of data types used by the contracts.
+ */
 library DataTypes {
     struct IndieGoalParams {
         uint createdTimestamp;

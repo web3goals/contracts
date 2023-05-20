@@ -45,7 +45,7 @@ makeSuiteCleanRoom("Goal Setting", function () {
     expect(params.isAchieved).to.equal(false);
   });
 
-  it("User must unsuccessfully set a goal without profile", async function () {
+  it("User without a profile must unsuccessfully set a goal", async function () {
     // Set goal
     await expect(
       goalContract

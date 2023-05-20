@@ -29,20 +29,6 @@ const config: HardhatUserConfig = {
       url: process.env.RPC_URL_MUMBAI || "",
       accounts: accounts,
     },
-    hyperspace: {
-      chainId: 3141,
-      url: process.env.RPC_URL_HYPERSPACE || "",
-      accounts: accounts,
-    },
-    filecoin: {
-      chainId: 314,
-      url: process.env.RPC_URL_FILECOIN || "",
-      accounts: accounts,
-    },
-    mumbaiProduction: {
-      url: process.env.RPC_URL_MUMBAI || "",
-      accounts: accounts,
-    },
   },
   etherscan: {
     apiKey: {

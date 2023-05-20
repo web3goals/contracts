@@ -21,6 +21,10 @@ async function main() {
   ).hasRole(adopterRole, userAddress);
   console.log("txOne:", txOne);
 
+  if (txOne) {
+    return;
+  }
+
   const txTwo = await Profile__factory.connect(
     profileContractAddress,
     deployer

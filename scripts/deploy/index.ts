@@ -16,11 +16,9 @@ async function main() {
   }
   console.log(`\n🌎 Running on chain '${chain}'`);
 
-  // Define deployer wallet
-  const deployerWallet = new ethers.Wallet(
-    process.env.PRIVATE_KEY_1 || "",
-    ethers.provider
-  );
+  // Define contract deployer
+  const accounts = await ethers.getSigners();
+  const deployer = accounts[0];
 
   // Define chain data
   const chainContracts = contracts[chain];
@@ -34,7 +32,7 @@ async function main() {
     const contract = await deployWithLogs({
       chainName: chain,
       contractName: chainContracts.profile.name,
-      contractFactory: new Profile__factory(deployerWallet),
+      contractFactory: new Profile__factory(deployer),
       isProxyRequired: chainContracts.profile.isUpgreadable,
       isInitializeRequired: chainContracts.profile.isInitializable,
     });
@@ -48,7 +46,7 @@ async function main() {
       chain,
       chainContracts.profile.name,
       chainContracts.profile.proxy,
-      new Profile__factory(deployerWallet)
+      new Profile__factory(deployer)
     );
   }
 
@@ -57,7 +55,7 @@ async function main() {
     const contract = await deployWithLogs({
       chainName: chain,
       contractName: chainContracts.treasury.name,
-      contractFactory: new Treasury__factory(deployerWallet),
+      contractFactory: new Treasury__factory(deployer),
       isProxyRequired: chainContracts.treasury.isUpgreadable,
       isInitializeRequired: chainContracts.treasury.isInitializable,
     });
@@ -71,7 +69,7 @@ async function main() {
       chain,
       chainContracts.treasury.name,
       chainContracts.treasury.proxy,
-      new Treasury__factory(deployerWallet)
+      new Treasury__factory(deployer)
     );
   }
 
@@ -80,7 +78,7 @@ async function main() {
     const contract = await deployWithLogs({
       chainName: chain,
       contractName: chainContracts.indieGoal.name,
-      contractFactory: new IndieGoal__factory(deployerWallet),
+      contractFactory: new IndieGoal__factory(deployer),
       contractInitializeArgs: [
         chainContracts.profile.proxy,
         chainContracts.treasury.proxy,
@@ -97,7 +95,7 @@ async function main() {
       chain,
       chainContracts.indieGoal.name,
       chainContracts.indieGoal.proxy,
-      new IndieGoal__factory(deployerWallet)
+      new IndieGoal__factory(deployer)
     );
   }
 }

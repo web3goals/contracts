@@ -4,11 +4,9 @@ import { Profile__factory } from "../../typechain-types";
 async function main() {
   console.log("👟 Start granting service");
 
-  // Init account
-  const accountWallet = new ethers.Wallet(
-    process.env.PRIVATE_KEY_1 || "",
-    ethers.provider
-  );
+  // Define contract deployer
+  const accounts = await ethers.getSigners();
+  const deployer = accounts[0];
 
   // Define params
   const profileContractAddress = "";
@@ -19,20 +17,20 @@ async function main() {
   // Execute transactions
   const txOne = await Profile__factory.connect(
     profileContractAddress,
-    accountWallet
+    deployer
   ).hasRole(adopterRole, userAddress);
   console.log("txOne:", txOne);
 
   const txTwo = await Profile__factory.connect(
     profileContractAddress,
-    accountWallet
+    deployer
   ).grantRole(adopterRole, userAddress);
   console.log("txTwo:", txTwo);
   await txTwo.wait();
 
   const txThree = await Profile__factory.connect(
     profileContractAddress,
-    accountWallet
+    deployer
   ).hasRole(adopterRole, userAddress);
   console.log("txThree:", txThree);
 }
